@@ -1,4 +1,4 @@
-#include <SFML/Graphics.hpp>
+#include "window.hpp"
 #include "algebra.hpp"
 
 int main()
@@ -16,7 +16,7 @@ int main()
     D.Normalize();
     D.log();
 
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
+    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
     sf::CircleShape shape(100.f);
     shape.setFillColor(sf::Color::Green);
 
