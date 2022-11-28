@@ -98,12 +98,12 @@ void Terrain::generateColorMap() {
 
 	for (int y = 0; y < this->sizeY; y++) {
 		for (int x = 0; x < this->sizeX; x++) {
-			buffer = GetCorrespondingColor(this->heightMap[y * this->sizeY + x], this->blend);
+			buffer = GetCorrespondingColor(this->heightMap[y * this->sizeX + x], this->blend);
 			//printf("R : %d, G : %d, B : %d\n" , buffer.r, buffer.g, buffer.b);
-			this->colorMap[(y * sizeY + x) * 4] = buffer.r;
-			this->colorMap[(y * sizeY + x) * 4 + 1] = buffer.g;
-			this->colorMap[(y * sizeY + x) * 4 + 2] = buffer.b;
-			this->colorMap[(y * sizeY + x) * 4 + 3] = 255;
+			this->colorMap[(y * sizeX + x) * 4] = buffer.r;
+			this->colorMap[(y * sizeX + x) * 4 + 1] = buffer.g;
+			this->colorMap[(y * sizeX + x) * 4 + 2] = buffer.b;
+			this->colorMap[(y * sizeX + x) * 4 + 3] = 255;
 		}
 	}
 }

@@ -115,26 +115,26 @@ void PerlinNoise2D(int nWidth, int nHeight, float* fSeed, int nOctaves, float fB
 
 			for (int o = 0; o < nOctaves; o++)
 			{
-				int nPitch = nWidth >> o;
-				int nSampleX1 = (x / nPitch) * nPitch;
-				int nSampleY1 = (y / nPitch) * nPitch;
+				int nXPitch = nWidth >> o;
+				int nYPitch = nHeight >> o;
+				int nSampleX1 = (x / nXPitch) * nXPitch;
+				int nSampleY1 = (y / nYPitch) * nYPitch;
 
-				int nSampleX2 = (nSampleX1 + nPitch) % nWidth;
-				int nSampleY2 = (nSampleY1 + nPitch) % nWidth;
+				int nSampleX2 = (nSampleX1 + nXPitch) % nWidth;
+				int nSampleY2 = (nSampleY1 + nYPitch) % nHeight;
 
-				float fBlendX = (float)(x - nSampleX1) / (float)nPitch;
-				float fBlendY = (float)(y - nSampleY1) / (float)nPitch;
+				float fBlendX = (float)(x - nSampleX1) / (float)nXPitch;
+				float fBlendY = (float)(y - nSampleY1) / (float)nYPitch;
 
-				float fSampleT = (1.0f - fBlendX) * fSeed[nSampleY1 * nHeight + nSampleX1] + fBlendX * fSeed[nSampleY1 * nHeight + nSampleX2];
-				float fSampleB = (1.0f - fBlendX) * fSeed[nSampleY2 * nHeight + nSampleX1] + fBlendX * fSeed[nSampleY2 * nHeight + nSampleX2];
+				float fSampleT = (1.0f - fBlendX) * fSeed[nSampleY1 * nWidth + nSampleX1] + fBlendX * fSeed[nSampleY1 * nWidth + nSampleX2];
+				float fSampleB = (1.0f - fBlendX) * fSeed[nSampleY2 * nWidth + nSampleX1] + fBlendX * fSeed[nSampleY2 * nWidth + nSampleX2];
 
 				fScaleAcc += fScale;
 				fNoise += (fBlendY * (fSampleB - fSampleT) + fSampleT) * fScale;
 				fScale = fScale / fBias;
 			}
 
-			// Scale to seed range
-			fOutput[y * nHeight + x] = fNoise / fScaleAcc;
+			fOutput[y * nWidth + x] = fNoise / fScaleAcc;
 		}
 
 }
@@ -143,19 +143,22 @@ void regenerateSprite(int sizeX, int sizeY, int octaves, float bias, sf::Uint8* 
 	
 	float* terrainN = new float[sizeX * sizeY];
 	float* seed = new float[sizeX * sizeY];
-	for (int i = 0; i < sizeY; i++) 
-		for (int j = 0; j < sizeX; j++) 
-			seed[i * sizeY + j] = (float)rand() / (float)RAND_MAX;
+	for (int i = 0; i < sizeY; i++) {
+		for (int j = 0; j < sizeX; j++) {
+			seed[i * sizeX + j] = (float)rand() / (float)RAND_MAX;
+			terrainN[i * sizeX + j] = 0.0f;
+		}
+	}
 
 	PerlinNoise2D(sizeX, sizeY, seed, octaves, bias, terrainN);
 
 	for (int y = 0; y < sizeY; y++) {
 		for (int x = 0; x < sizeX; x++) {
-			sf::Uint8 currentValue = (sf::Uint8)(terrainN[y * sizeY + x] * 255.0f);
-			pixelGrid[(y * sizeY + x) * 4] = currentValue;
-			pixelGrid[(y * sizeY + x) * 4 + 1] = currentValue;
-			pixelGrid[(y * sizeY + x) * 4 + 2] = currentValue;
-			pixelGrid[(y * sizeY + x) * 4 + 3] = (sf::Uint8)255;
+			sf::Uint8 currentValue = (sf::Uint8)(terrainN[y * sizeX + x] * 255.0f);
+			pixelGrid[(y * sizeX + x) * 4] = currentValue;
+			pixelGrid[(y * sizeX + x) * 4 + 1] = currentValue;
+			pixelGrid[(y * sizeX + x) * 4 + 2] = currentValue;
+			pixelGrid[(y * sizeX + x) * 4 + 3] = (sf::Uint8)255;
 		}
 	}
 
@@ -171,13 +174,15 @@ void generateHeightMap(int sizeX, int sizeY, int octaves, float bias, float* hei
 	float* seed = new float[sizeX * sizeY];
 	for (int i = 0; i < sizeY; i++)
 		for (int j = 0; j < sizeX; j++)
-			seed[i * sizeY + j] = (float)rand() / (float)RAND_MAX;
+			seed[i * sizeX + j] = ((float)rand() / (float)RAND_MAX);
 
 	PerlinNoise2D(sizeX, sizeY, seed, octaves, bias, terrainN);
 
 	for (int y = 0; y < sizeY; y++) 
 		for (int x = 0; x < sizeX; x++) 
-			heightMap[(y * sizeY + x) ] = terrainN[y * sizeY + x] * 255.0f;
+			heightMap[y * sizeX + x] = terrainN[y * sizeX + x] * 255.0f;
+
+	printf("Pixel : %d", (int)heightMap[(sizeY - 1) * (sizeX - 1)]);
 
 	delete[] terrainN;
 	delete[] seed;

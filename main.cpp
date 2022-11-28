@@ -34,7 +34,7 @@ int main()
     sf::Vector2f infoTextPos(4.0f, 4.0f);
     infoText.setPosition(infoTextPos);
 
-    sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", octaves, (int)bias, (int)sigmoidBlend);
+    sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", octaves, bias, (int)sigmoidBlend);
     infoText.setString(infoString);
 
     Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
