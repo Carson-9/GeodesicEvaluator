@@ -1,36 +1,113 @@
 #include "window.hpp"
 #include "algebra.hpp"
+#include "terrain.hpp"
+#include <format>
 
 int main()
 {
 
+    const int gridSize = 1024;
+    const int WIDTH = 1920;
+    const int HEIGHT = 1080;
+    int octaves = 8;
+    float bias = 1.8f;
+    float sigmoidBlend = 100.f;
+
+    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "TIPE");
+    sf::Image img;
+    sf::Texture tex;
+    sf::Sprite background;
+    sf::Text infoText;
+    sf::Font mainFont;
+
+    char infoString[128];
     
-    Vector3<int> A(0, 1, 0);
-    Vector3<int> B(1, 0, 1);
-    Vector3<int> C = A + B;
-    Vector3<int> D = A ^ B;
-    printf("Magnitude of C : %d, Dot product : %d\n", C.MagnitudeSquared(), A * B);
-    C.log();
-    D.log();
+    if (!mainFont.loadFromFile("Resources/firaCode.ttf")) {
+        printf("Error, unrecognized font!");
+        return EXIT_FAILURE;
+    }
+   
+    infoText.setFont(mainFont);
+    infoText.setCharacterSize(24);
+    infoText.setFillColor(sf::Color::White);
+    infoText.setStyle(sf::Text::Bold);
+    sf::Vector2f infoTextPos(4.0f, 4.0f);
+    infoText.setPosition(infoTextPos);
 
-    D.Normalize();
-    D.log();
+    sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", octaves, (int)bias, (int)sigmoidBlend);
+    infoText.setString(infoString);
 
-    sf::RenderWindow window(sf::VideoMode(1920, 1080), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
+    terrain->makeSprite(background);
+    img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
+    tex.loadFromImage(img);
+    background.setTexture(tex);
 
     while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
         {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
+            //switch (event.type) {
 
-        window.clear();
-        window.draw(shape);
+            if (event.type == sf::Event::Closed) window.close();
+            else if (event.type == sf::Event::KeyReleased) {
+                switch (event.key.code) {
+
+                case sf::Keyboard::Space:
+                    terrain->setBlend(sigmoidBlend);
+                    terrain->generateTerrain(octaves, bias);
+                    terrain->makeSprite(background);
+                    img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
+                    tex.loadFromImage(img);
+                    background.setTexture(tex);
+                    break;
+
+
+                case sf::Keyboard::Left:
+                    octaves--;
+                    if (octaves < 1) octaves = 1;
+                    break;
+
+                case sf::Keyboard::Right:
+                    octaves++;
+                    if (octaves > 8) octaves = 8;
+                    break;
+
+                case sf::Keyboard::Up:
+                    bias += 0.1f;
+                    if (bias > 3.0f) bias = 3.0f;
+                    break;
+
+                case sf::Keyboard::Down:
+                    bias -= 0.1f;
+                    if (bias < 0.2f) bias = 0.2f;
+                    break;
+
+                case sf::Keyboard::B:
+                    sigmoidBlend += 5.0f;
+                    break;
+
+                case sf::Keyboard::V:
+                    sigmoidBlend -= 5.0f;
+                    if (sigmoidBlend < 0.0f) sigmoidBlend = 0.0f;
+                    break;
+
+
+                default:
+                    break;
+
+                }
+
+                sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", octaves, bias, (int)sigmoidBlend);
+                infoText.setString(infoString);
+
+            }
+
+        }
+        window.clear(sf::Color::Black);
+        window.draw(background);
+        window.draw(infoText);
         window.display();
     }
 
