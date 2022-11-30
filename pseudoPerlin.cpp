@@ -182,8 +182,6 @@ void generateHeightMap(int sizeX, int sizeY, int octaves, float bias, float* hei
 		for (int x = 0; x < sizeX; x++) 
 			heightMap[y * sizeX + x] = terrainN[y * sizeX + x] * 255.0f;
 
-	printf("Pixel : %d", (int)heightMap[(sizeY - 1) * (sizeX - 1)]);
-
 	delete[] terrainN;
 	delete[] seed;
 }

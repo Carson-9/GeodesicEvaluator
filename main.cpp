@@ -1,7 +1,7 @@
 #include "window.hpp"
 #include "algebra.hpp"
 #include "terrain.hpp"
-#include <format>
+#include "stringManipulation.hpp"
 
 int main()
 {
@@ -91,6 +91,10 @@ int main()
                 case sf::Keyboard::V:
                     sigmoidBlend -= 5.0f;
                     if (sigmoidBlend < 0.0f) sigmoidBlend = 0.0f;
+                    break;
+
+                case sf::Keyboard::S:
+                    writeTableToFile(terrain->getSizeY(), terrain->getSizeX(), terrain->getHeightMap(), "Output/");
                     break;
 
 

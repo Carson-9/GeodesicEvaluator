@@ -2,19 +2,6 @@
 
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend) {
 
-	/*
-	if (height < 20.5f) return DEEP_SEA;
-	if (height < 40.8f) return LOW_SEA;
-	if (height < 61.2f) return MID_SEA;
-	if (height < 81.6f) return UP_SEA;
-	if (height < 102.0f) return TOP_SEA;
-	if (height < 110.5f) return SAND;
-	if (height < 145.5f) return LIGHT_GRASS;
-	if (height < 178.5f) return DARK_GRASS;
-	if (height < 234.6f) return ROCK;
-	else return SNOW;
-	*/
-
 	sf::Color blend;
 
 	for (int i = 0; i < COLOR_NUMBER - 1; i++) {
@@ -42,7 +29,6 @@ void colorTerrain(int sizeX, int sizeY, sf::Uint8* pixelArray, float sigmoidBlen
 	for (int y = 0; y < sizeY; y++) {
 		for (int x = 0; x < sizeX; x++) {
 			buffer = GetCorrespondingColor(pixelArray[(y * sizeY + x) * 4], sigmoidBlend);
-			//printf("Color : R %d, G %d, B %d\n", buffer.r, buffer.g, buffer.b);
 			pixelArray[(y * sizeY + x) * 4] = buffer.r;
 			pixelArray[(y * sizeY + x) * 4 + 1] = buffer.g;
 			pixelArray[(y * sizeY + x) * 4 + 2] = buffer.b;
@@ -99,7 +85,6 @@ void Terrain::generateColorMap() {
 	for (int y = 0; y < this->sizeY; y++) {
 		for (int x = 0; x < this->sizeX; x++) {
 			buffer = GetCorrespondingColor(this->heightMap[y * this->sizeX + x], this->blend);
-			//printf("R : %d, G : %d, B : %d\n" , buffer.r, buffer.g, buffer.b);
 			this->colorMap[(y * sizeX + x) * 4] = buffer.r;
 			this->colorMap[(y * sizeX + x) * 4 + 1] = buffer.g;
 			this->colorMap[(y * sizeX + x) * 4 + 2] = buffer.b;
