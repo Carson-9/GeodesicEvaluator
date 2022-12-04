@@ -78,6 +78,17 @@ void Terrain::setBlend(float newBlend) {
 	this->blend = newBlend;
 }
 
+void Terrain::setHeightMap(float* newMap, int sizeX, int sizeY) {
+	this->sizeX = sizeX;
+	this->sizeY = sizeY;
+	if (this->heightMap != nullptr) delete[] this->heightMap;
+	this->heightMap = new float[sizeX * sizeY];
+
+	for (int y = 0; y < sizeY; y++)
+		for (int x = 0; x < sizeX; x++)
+			this->heightMap[y * sizeX + x] = newMap[y * sizeX + x];
+}
+
 void Terrain::generateColorMap() {
 	if (this->colorMap == nullptr) this->colorMap = new sf::Uint8[this->sizeX * this->sizeY * 4];
 	sf::Color buffer;
@@ -100,3 +111,16 @@ void Terrain::makeSprite(sf::Sprite sprite) {
 
 	sprite.setTexture(tex);
 }
+
+
+void Terrain::generateFromFile(const char* fileName) {
+	int* terrainDim = new int[2];
+	terrainDim = getTableDimensionFromFile(fileName);
+	
+	this->sizeX = terrainDim[0];
+	this->sizeY = terrainDim[1];
+	if (this->heightMap != NULL) delete[] this->heightMap;
+	this->heightMap = readFloatTableFromFile(fileName, terrainDim[0], terrainDim[1]);
+
+	delete[] terrainDim;
+} 

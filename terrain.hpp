@@ -1,6 +1,7 @@
 #pragma once
 #include "pseudoPerlin.hpp"
 #include "utilLib.hpp"
+#include "stringManipulation.hpp"
 
 class Terrain {
 	public:
@@ -10,12 +11,15 @@ class Terrain {
 
 		void generateTerrain(int octaves, float bias);
 		void generateColorMap();
+		void generateFromFile(const char* fileName);
 		int getSizeX();
 		int getSizeY();
-		void setBlend(float newBlend);
-
 		float* getHeightMap();
 		sf::Uint8* getColorMap();
+
+		void setBlend(float newBlend);
+		void setHeightMap(float* newMap, int sizeX, int sizeY);
+
 		void makeSprite(sf::Sprite sprite);
 
 

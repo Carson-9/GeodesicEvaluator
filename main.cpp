@@ -1,7 +1,6 @@
 #include "window.hpp"
 #include "algebra.hpp"
 #include "terrain.hpp"
-#include "stringManipulation.hpp"
 
 int main()
 {
@@ -19,6 +18,12 @@ int main()
     sf::Sprite background;
     sf::Text infoText;
     sf::Font mainFont;
+
+    //for (int y = 0; y < receivedDimensions[1]; y++)
+        //for (int x = 0; x < receivedDimensions[0]; x++)
+            //printf("%f\n", heightTable[y * receivedDimensions[0] + x]);
+
+    //delete[] receivedDimensions;
 
     char infoString[128];
     
@@ -38,6 +43,7 @@ int main()
     infoText.setString(infoString);
 
     Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
+    terrain->generateFromFile("Output/greece.txt");
     terrain->makeSprite(background);
     img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
     tex.loadFromImage(img);

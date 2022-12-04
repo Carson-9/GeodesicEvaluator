@@ -8,21 +8,14 @@ void replaceCharInCharList(char* string, int stringSize, char to_replace, char r
 void addFileExtension(char* string, int allocatedChars, const char fileExtension[]) {
 
 	int fileExtensionSize = getStringSize(fileExtension);
-	if (allocatedChars < fileExtensionSize) {
+	int indexToAdd = getStringSize(string) - 1;
+	if (allocatedChars - indexToAdd < fileExtensionSize) {
 		printf("addFileExtension -> Error, extension name too big for the given array!");
 		return;
 	}
 
-	for (int i = 0; i < allocatedChars - fileExtensionSize; i++) {
-		if (string[i] == '\0') {
-			// Also copy the sentinel for good measure
-			for (int j = 0; j <= fileExtensionSize; j++) string[i + j] = fileExtension[j];
-			return;
-		}
-	}
-
 	for (int i = 0; i < fileExtensionSize; i++) {
-		string[allocatedChars - 1 - i] = fileExtension[fileExtensionSize - i];
+		string[indexToAdd + i] = fileExtension[i];
 	}
 
 
@@ -46,15 +39,22 @@ int getStringSize(const char string[]) {
 		currentChar = string[count];
 		count++;
 	}
-	return (count + 1);
+	return (count);
 }
 
-void appendCharListToCharList(char* receiver, char* to_add, int size_receiver, int size_adder, int indexToAdd) {
-	if ((size_receiver - indexToAdd) < size_adder) {
+void appendCharListToCharList(char* receiver, char* to_add, int size_receiver, int indexToAdd) {
+	
+	int adderSize = getStringSize(to_add);
+	
+	if ((size_receiver - indexToAdd) < adderSize) {
 		printf("Error, tried to add a string bigger than the receiver!\n");
 		return;
 	}
-	for (int i = 0; i < size_adder; i++) receiver[indexToAdd + i] = to_add[i];
+	for (int i = 0; i <= adderSize; i++) {
+		receiver[indexToAdd + i] = to_add[i];
+		if (to_add[i] == '\0') return;
+	}
+
 }
 
 
@@ -80,7 +80,7 @@ bool writeTableToFile(int sizeY, int sizeX, float* table, const char folderName[
 		setFileFolder(fileName, 128, folderName);
 
 		int folderNameSize = getStringSize(folderName);
-		appendCharListToCharList(fileName, currentDate, 128, 64, folderNameSize);
+		appendCharListToCharList(fileName, currentDate, 128, folderNameSize - 1);
 
 		addFileExtension(fileName, 128, ".txt");
 
@@ -115,7 +115,7 @@ bool writeTableToFile(int sizeY, int sizeX, float* table, const char folderName[
 	}
 }
 
-int* getTableDimensionFromFile(char* filename) {
+int* getTableDimensionFromFile(const char* filename) {
 
 	std::ifstream readFile(filename);
 
@@ -132,21 +132,8 @@ int* getTableDimensionFromFile(char* filename) {
 
 }
 
-void convertStringLineToFloats(std::string readLine, float* readArray, int currentLine, int sizeX) {
-	std::string splitChar = " ";
-	std::string currentFloat = "";
-	int currentSplit = 0;
-	int newSplit = 0;
-	for (int i = 0; i < sizeX; i++) {
-		newSplit = readLine.find(splitChar);
-		currentFloat = readLine.substr(currentSplit, newSplit);
-		readArray[currentLine * sizeX + i] = std::stof(currentFloat);
-		readLine = readLine.substr(currentSplit + 1);
-		currentSplit = newSplit;
-	}
-}
 
-float* readFloatTableFromFile(char* filename, int sizeX, int sizeY) {
+float* readFloatTableFromFile(const char* filename, int sizeX, int sizeY) {
 	
 	std::ifstream readFile(filename);
 	
@@ -157,11 +144,18 @@ float* readFloatTableFromFile(char* filename, int sizeX, int sizeY) {
 
 	float* readArray = new float[sizeX * sizeY];
 	std::string readLine;
+	readFile >> readLine;
+	readFile >> readLine;
+
 	int currentLine = 0;
 
-	while (std::getline(readFile, readLine)) {
-		convertStringLineToFloats(readLine, readArray, currentLine, sizeX);
+	for (int y = 0; y < sizeY; y++) {
+		for (int x = 0; x < sizeX; x++) {
+			readFile >> readLine;
+			readArray[y * sizeX + x] = std::atof(readLine.c_str());
+		}
 	}
 
 	readFile.close();
+	return readArray;
 }
