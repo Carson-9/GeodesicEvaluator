@@ -19,12 +19,6 @@ int main()
     sf::Text infoText;
     sf::Font mainFont;
 
-    //for (int y = 0; y < receivedDimensions[1]; y++)
-        //for (int x = 0; x < receivedDimensions[0]; x++)
-            //printf("%f\n", heightTable[y * receivedDimensions[0] + x]);
-
-    //delete[] receivedDimensions;
-
     char infoString[128];
     
     if (!mainFont.loadFromFile("Resources/firaCode.ttf")) {
@@ -43,7 +37,7 @@ int main()
     infoText.setString(infoString);
 
     Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
-    terrain->generateFromFile("Output/greece.txt");
+    //terrain->generateFromFile("Output/tGreece.txt");
     terrain->makeSprite(background);
     img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
     tex.loadFromImage(img);
@@ -77,7 +71,7 @@ int main()
 
                 case sf::Keyboard::Right:
                     octaves++;
-                    if (octaves > 8) octaves = 8;
+                    if (octaves > 16) octaves = 16;
                     break;
 
                 case sf::Keyboard::Up:

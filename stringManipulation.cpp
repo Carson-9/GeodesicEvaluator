@@ -36,8 +36,7 @@ int getStringSize(const char string[]) {
 	int count = 0;
 	char currentChar = ' ';
 	while (currentChar != '\0') {
-		currentChar = string[count];
-		count++;
+		currentChar = string[count++];
 	}
 	return (count);
 }
@@ -152,6 +151,7 @@ float* readFloatTableFromFile(const char* filename, int sizeX, int sizeY) {
 	for (int y = 0; y < sizeY; y++) {
 		for (int x = 0; x < sizeX; x++) {
 			readFile >> readLine;
+			//printf("%s\n", readLine.c_str());
 			readArray[y * sizeX + x] = std::atof(readLine.c_str());
 		}
 	}
