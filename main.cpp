@@ -1,6 +1,6 @@
-#include "window.hpp"
-#include "algebra.hpp"
-#include "terrain.hpp"
+#include "window/window.hpp"
+#include "utilitaries/algebra.hpp"
+#include "terrain/terrain.hpp"
 
 int main()
 {
