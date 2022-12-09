@@ -1,10 +1,9 @@
 #include "window.hpp"
 
-
-void windowHierarchy::executeEvent(sf::Event::EventType event) {
+void windowHierarchy::executeEvent(sf::Event event) {
     for (auto& currentObject : this->linkedObjects) {
-        if (currentObject != NULL && currentObject->reactsTo == event) {
-            currentObject->reaction();
+        if (currentObject != NULL && currentObject->reactsTo == event.type) {
+            if(!currentObject->isReactionEmpty()) currentObject->react(event);
         }
     }
 }
@@ -21,6 +20,12 @@ windowHierarchy::windowHierarchy(sf::RenderWindow* win) {
     this->vectorSize = 0;
 }
 
+windowHierarchy::~windowHierarchy() {
+    this->win->close();
+    delete this->win;
+    this->linkedObjects.~vector();
+}
+
 windowSlaveObjects::windowSlaveObjects(windowHierarchy* win) {
     this->posX = 0;
     this->posY = 0;
@@ -30,6 +35,7 @@ windowSlaveObjects::windowSlaveObjects(windowHierarchy* win) {
     win->vectorSize++;
 
     win->linkedObjects.push_back(this);
+    this->reaction = DEFAULT_VOID_FUNCTION;
 }
 
 windowSlaveObjects::~windowSlaveObjects(){
@@ -42,6 +48,19 @@ windowSlaveObjects::windowSlaveObjects(){
     this->reactsTo = sf::Event::LostFocus;
     this->linkedWindow = NULL;
     this->ID = -1;
+    this->reaction = DEFAULT_VOID_FUNCTION;
+}
+
+void windowSlaveObjects::setReaction(void(*function)(sf::Event)) {
+    this->reaction = function;
+}
+
+void windowSlaveObjects::react(sf::Event args) {
+    this->reaction(args);
+}
+
+bool windowSlaveObjects::isReactionEmpty() {
+    return (this->reaction == NULL);
 }
 
 Button::Button(int posX, int posY, int width, int height, sf::Color background, const char* text, windowHierarchy* linkedWindow) : windowSlaveObjects(linkedWindow) {
@@ -73,7 +92,7 @@ void baseWindow(int width, int height) {
 
     sf::Font mainFont;
     sf::Text title;
-    sf::Vector2f titlePos(width / 2, 16.0f);
+    sf::Vector2f titlePos((float) (width / 2), 16.0f);
     title.setPosition(titlePos);
     title.setString("TIPE");
 
@@ -83,13 +102,15 @@ void baseWindow(int width, int height) {
     }
 
 
-	sf::RenderWindow window(sf::VideoMode(width, height), "TIPE");
+	//sf::RenderWindow window(sf::VideoMode(width, height), "TIPE");
 
-	while (window.isOpen()) {
+    windowHierarchy mainWin(width, height, "TIPE");
+
+	while (mainWin.win->isOpen()) {
         sf::Event event;
-        while (window.pollEvent(event)) {
+        while (mainWin.win->pollEvent(event)) {
 
-            if (event.type == sf::Event::Closed) window.close();
+            if (event.type == sf::Event::Closed) mainWin.win->close();
             else if (event.type == sf::Event::KeyReleased) {
                 switch (event.key.code) {
 
@@ -98,9 +119,9 @@ void baseWindow(int width, int height) {
             }
         }
 
-        window.clear(sf::Color::Black);
-        window.draw(title);
-        window.display();
+        mainWin.win->clear(sf::Color::Black);
+        mainWin.win->draw(title);
+        mainWin.win->display();
 	}
 
 }

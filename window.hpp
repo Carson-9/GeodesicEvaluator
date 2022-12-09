@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include "stringManipulation.hpp"
 
+inline void DEFAULT_VOID_FUNCTION(sf::Event){}
 
 class windowSlaveObjects;
 class windowHierarchy;
@@ -11,12 +12,14 @@ public:
 
 	windowHierarchy(int width, int height, const char* title);
 	windowHierarchy(sf::RenderWindow* win);
+	
+	~windowHierarchy();
 
 	sf::RenderWindow* win;
 	std::vector<windowSlaveObjects*> linkedObjects;
 	int vectorSize;
 
-	void executeEvent(sf::Event::EventType event);
+	void executeEvent(sf::Event event);
 
 private:
 };
@@ -29,7 +32,9 @@ public:
 
 	~windowSlaveObjects();
 
-	void reaction() {};
+	void setReaction(void(*function)(sf::Event));
+	void react(sf::Event args);
+	bool isReactionEmpty();
 
 	windowHierarchy* linkedWindow;
 	int posX;
@@ -38,6 +43,7 @@ public:
 
 private:
 	int ID;
+	void(*reaction)(sf::Event);
 };
 
 
