@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "stringManipulation.hpp"
+#include "utilitaries/stringManipulation.hpp"
 
 inline void DEFAULT_VOID_FUNCTION(sf::Event){}
 
