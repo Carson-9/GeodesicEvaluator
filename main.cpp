@@ -20,8 +20,10 @@ int main()
     sf::Font mainFont;
 
     char infoString[128];
+
+    //baseWindow(600,600);
     
-    if (!mainFont.loadFromFile("Resources/firaCode.ttf")) {
+    if (!mainFont.loadFromFile("Resources/ALBold.ttf")) {
         printf("Error, unrecognized font!");
         return EXIT_FAILURE;
     }
