@@ -9,6 +9,8 @@
 #include <cstring>
 
 
+// New Comment
+
 void replaceCharInCharList(char* string, int stringSize, char to_replace, char replacement);
 int getStringSize(const char string[]);
 void addFileExtension(char* string, int allocatedChars, const char fileExtension[]);
