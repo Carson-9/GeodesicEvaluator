@@ -1,6 +1,7 @@
 #include "window/window.hpp"
 #include "utilitaries/algebra.hpp"
 #include "terrain/terrain.hpp"
+#include "window/terrainWindow.hpp"
 
 int main()
 {
@@ -8,11 +9,19 @@ int main()
     const int gridSize = 1024;
     const int WIDTH = 1920;
     const int HEIGHT = 1080;
-    int octaves = 8;
-    float bias = 1.8f;
-    float sigmoidBlend = 100.f;
+    const int octaves = 8;
+    const float bias = 1.8f;
+    const float sigmoidBlend = 100.f;
 
-    sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "TIPE");
+    threadpool* threads = threadpool_init(16);
+
+    int baseDimensions[2] = { 800, 800 };
+    //int terrainDimensions[2] = { 1920, 1080 };
+
+    terrainWindowArgs terrainWinArgs = { 1920, 1080, "TIPE" };
+
+
+    //sf::RenderWindow window(sf::VideoMode(WIDTH, HEIGHT), "TIPE");
     sf::Image img;
     sf::Texture tex;
     sf::Sprite background;
@@ -21,7 +30,9 @@ int main()
 
     char infoString[128];
 
-    //baseWindow(600,600);
+    launch_newThread(threads, multiThreadedBaseWindow, (void*)baseDimensions);
+    launch_newThread(threads, multiThreadLaunchTerrainWindow, (void*)&terrainWinArgs);
+    //baseWindow(800, 800);
     
     if (!mainFont.loadFromFile("Resources/ALBold.ttf")) {
         printf("Error, unrecognized font!");
@@ -38,14 +49,14 @@ int main()
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", octaves, bias, (int)sigmoidBlend);
     infoText.setString(infoString);
 
-    Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
+    //Terrain* terrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
     //terrain->generateFromFile("Output/tGreece.txt");
-    terrain->makeSprite(background);
-    img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
-    tex.loadFromImage(img);
-    background.setTexture(tex);
+    //terrain->makeSprite(background);
+    //img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
+    //tex.loadFromImage(img);
+    //background.setTexture(tex);
 
-    while (window.isOpen())
+    /*while (window.isOpen())
     {
         sf::Event event;
         while (window.pollEvent(event))
@@ -57,8 +68,7 @@ int main()
                 switch (event.key.code) {
 
                 case sf::Keyboard::Space:
-                    terrain->setBlend(sigmoidBlend);
-                    terrain->generateTerrain(octaves, bias);
+                    terrain->generateTerrain();
                     terrain->makeSprite(background);
                     img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
                     tex.loadFromImage(img);
@@ -67,32 +77,32 @@ int main()
 
 
                 case sf::Keyboard::Left:
-                    octaves--;
-                    if (octaves < 1) octaves = 1;
+                    terrain->setOctaves(terrain->getOctaves() - 1);
+                    if (terrain->getOctaves() < 1) terrain->setOctaves(1);
                     break;
 
                 case sf::Keyboard::Right:
-                    octaves++;
-                    if (octaves > 16) octaves = 16;
+                    terrain->setOctaves(terrain->getOctaves() + 1);
+                    if (terrain->getOctaves() > 16) terrain->setOctaves(16);
                     break;
 
                 case sf::Keyboard::Up:
-                    bias += 0.1f;
-                    if (bias > 3.0f) bias = 3.0f;
+                    terrain->setBias(terrain->getBias() + 0.1f);
+                    if (terrain->getBias() > 3.0f) terrain->setBias(3.0f);
                     break;
 
                 case sf::Keyboard::Down:
-                    bias -= 0.1f;
-                    if (bias < 0.2f) bias = 0.2f;
+                    terrain->setBias(terrain->getBias() - 0.1f);
+                    if (terrain->getBias() < 0.2f) terrain->setBias(0.2f);
                     break;
 
                 case sf::Keyboard::B:
-                    sigmoidBlend += 5.0f;
+                    terrain->setBlend(terrain->getBlend() + 5.0f);
                     break;
 
                 case sf::Keyboard::V:
-                    sigmoidBlend -= 5.0f;
-                    if (sigmoidBlend < 0.0f) sigmoidBlend = 0.0f;
+                    terrain->setBlend(terrain->getBlend() - 5.0f);
+                    if (terrain->getBlend() < 0.0f) terrain->setBlend(0.0f);
                     break;
 
                 case sf::Keyboard::S:
@@ -115,7 +125,7 @@ int main()
         window.draw(background);
         window.draw(infoText);
         window.display();
-    }
-
+    }*/
+    threadpool_join(threads);
     return 0;
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
 #include "utilitaries/stringManipulation.hpp"
+#include "SFML-Complements.hpp"
 
 class windowSlaveObjects;
 class windowHierarchy;

@@ -41,8 +41,10 @@ Terrain::Terrain(int sizeX, int sizeY, int octaves, float bias, float blend) {
 	this->sizeY = sizeY;
 	this->heightMap = new float[sizeX * sizeY];
 	this->colorMap = nullptr;
-	this->generateTerrain(octaves, bias);
+	this->generateTerrain();
 	this->blend = blend;
+	this->octaves = octaves;
+	this->bias = bias;
 }
 
 Terrain::~Terrain() {
@@ -50,8 +52,8 @@ Terrain::~Terrain() {
 	delete this->heightMap;
 }
 
-void Terrain::generateTerrain(int octaves, float bias) {
-	generateHeightMap(this->sizeX, this->sizeY, octaves, bias, this->heightMap);
+void Terrain::generateTerrain() {
+	generateHeightMap(this->sizeX, this->sizeY, this->octaves, this->bias, this->heightMap);
 	if (this->colorMap != nullptr) {
 		delete this->colorMap;
 		this->colorMap = nullptr;
@@ -72,6 +74,26 @@ int Terrain::getSizeX() {
 
 int Terrain::getSizeY() {
 	return this->sizeY;
+}
+
+int Terrain::getOctaves() {
+	return this->octaves;
+}
+
+float Terrain::getBias() {
+	return this->bias;
+}
+
+float Terrain::getBlend() {
+	return this->blend;
+}
+
+void Terrain::setOctaves(int newOctaves) {
+	this->octaves = newOctaves;
+}
+
+void Terrain::setBias(float newBias) {
+	this->bias = newBias;
 }
 
 void Terrain::setBlend(float newBlend) {

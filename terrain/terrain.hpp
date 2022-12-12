@@ -9,14 +9,20 @@ class Terrain {
 		Terrain(int sizeX, int SizeY, int octaves, float bias, float blend);
 		~Terrain();
 
-		void generateTerrain(int octaves, float bias);
+		void generateTerrain();
 		void generateColorMap();
 		void generateFromFile(const char* fileName);
 		int getSizeX();
 		int getSizeY();
+		int getOctaves();
+		float getBias();
+		float getBlend();
+
 		float* getHeightMap();
 		sf::Uint8* getColorMap();
 
+		void setOctaves(int newOctaves);
+		void setBias(float newBias);
 		void setBlend(float newBlend);
 		void setHeightMap(float* newMap, int sizeX, int sizeY);
 
@@ -27,6 +33,8 @@ class Terrain {
 		int sizeX;
 		int sizeY;
 		float* heightMap;
+		int octaves;
+		float bias;
 		float blend;
 		sf::Uint8* colorMap;
 		sf::Image img;

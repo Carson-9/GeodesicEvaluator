@@ -103,6 +103,7 @@ Button::Button(int posX, int posY, int width, int height, sf::Color background, 
     this->textObject.setCharacterSize(24);
     this->textObject.setFont(this->textFont);
     this->textObject.setStyle(sf::Text::Bold);
+    //centerText(this->textObject, sf::Vector2f((float)(this->posX + 2 * this->width)/ 2.0f, ((float)(this->posY + 2 * this->height)/ 2.0f)));
 
     this->linkedWindow = linkedWindow;
 
