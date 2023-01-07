@@ -134,3 +134,36 @@ int Button::getHeight() {
 void Button::setColor(sf::Color color) {
     this->representation.setFillColor(color);
 }
+
+
+
+
+Slider::Slider(int posX, int posY, int length, int height, float lower, float upper, sf::Color background, sf::Color sliderColor, windowHierarchy* linkedWindow) {
+    this->posX = posX;
+    this->posY = posY;
+    this->length = length;
+    this->height = height;
+
+    this->lowerBound = lower;
+    this->upperBound = upper;
+
+    this->bar.setFillColor(background);
+    this->slider.setFillColor(sliderColor);
+    this->slider.setOrigin(sf::Vector2f(posX, posY + (height/2.0f)));
+
+    this->reactsTo = sf::Event::MouseButtonPressed;
+    this->sliderPos = 0.0f;
+}
+
+Slider::~Slider() {
+
+}
+
+float Slider::getSliderPos() {
+    return this->sliderPos;
+}
+
+void Slider::setSliderPos(float pos) {
+    this->sliderPos = pos;
+    this->slider.setPosition(pos * this->length , 0);
+}

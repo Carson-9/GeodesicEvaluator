@@ -17,6 +17,7 @@ class Terrain {
 		int getOctaves();
 		float getBias();
 		float getBlend();
+		float getBlendResKeyboard();
 
 		float* getHeightMap();
 		sf::Uint8* getColorMap();
@@ -25,6 +26,10 @@ class Terrain {
 		void setBias(float newBias);
 		void setBlend(float newBlend);
 		void setHeightMap(float* newMap, int sizeX, int sizeY);
+		void setBlendResKeyboard(float newBlendRes);
+		void setIndicatorList(int* list, int size);
+
+		void toggleIndicatorDraw();
 
 		void makeSprite(sf::Sprite sprite);
 
@@ -36,6 +41,9 @@ class Terrain {
 		int octaves;
 		float bias;
 		float blend;
+		float blendResolKeyboard;
+		bool drawHeightIndicators;
+		bool* heightIndicatorList; //Faster checkup with a boolean associated to the height
 		sf::Uint8* colorMap;
 		sf::Image img;
 		sf::Texture tex;

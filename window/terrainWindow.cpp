@@ -3,10 +3,10 @@
 
 void multiThreadDrawTerrain(void* args) {
     drawTerrainArgs* realArgs = (drawTerrainArgs*)args;
-    drawTerrain(realArgs->win, realArgs->terrain);
+    drawTerrain(realArgs->win, realArgs->terrain, sf::Text());
 }
 
-void drawTerrain(windowHierarchy* win, Terrain* terrain) {
+void drawTerrain(windowHierarchy* win, Terrain* terrain, sf::Text infoText) {
     sf::Image img;
     sf::Texture tex;
     sf::Sprite background;
@@ -14,7 +14,11 @@ void drawTerrain(windowHierarchy* win, Terrain* terrain) {
     img.create(terrain->getSizeX(), terrain->getSizeY(), terrain->getColorMap());
     tex.loadFromImage(img);
     background.setTexture(tex);
+    win->win->clear(sf::Color::Black);
     win->win->draw(background);
+    win->win->draw(infoText);
+    win->win->display();
+    return;
 }
 
 
@@ -45,11 +49,19 @@ void launchTerrainWindow(int width, int height, const char* filename) {
     sf::Vector2f infoTextPos(4.0f, 4.0f);
     infoText.setPosition(infoTextPos);
 
+    //mainTerrain->generateFromFile("Output/tGreece.txt");
+    mainTerrain->generateColorMap();
+
+
+    int heightToDraw[] = {25, 50, 75, 100, 125, 150, 175, 200};
+    mainTerrain->setIndicatorList(heightToDraw, 8);
+
+
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", mainTerrain->getOctaves(), mainTerrain->getBias(), (int)mainTerrain->getBlend());
     infoText.setString(infoString);
 
     windowHierarchy mainWin(width, height, "TIPE");
-    drawTerrain(&mainWin, mainTerrain);
+    drawTerrain(&mainWin, mainTerrain, infoText);
 
     while (mainWin.win->isOpen()) {
         sf::Event event;
@@ -65,6 +77,10 @@ void launchTerrainWindow(int width, int height, const char* filename) {
                     mainTerrain->generateTerrain();
                     break;
 
+                case sf::Keyboard::R:
+                    mainTerrain->generateColorMap();
+                    drawTerrain(&mainWin, mainTerrain, infoText);
+                    break;
 
                 case sf::Keyboard::Left:
                     mainTerrain->setOctaves(mainTerrain->getOctaves() - 1);
@@ -73,7 +89,7 @@ void launchTerrainWindow(int width, int height, const char* filename) {
 
                 case sf::Keyboard::Right:
                     mainTerrain->setOctaves(mainTerrain->getOctaves() + 1);
-                    if (mainTerrain->getOctaves() > 16) mainTerrain->setOctaves(16);
+                    if (mainTerrain->getOctaves() > 11) mainTerrain->setOctaves(11);
                     break;
 
                 case sf::Keyboard::Up:
@@ -87,18 +103,27 @@ void launchTerrainWindow(int width, int height, const char* filename) {
                     break;
 
                 case sf::Keyboard::B:
-                    mainTerrain->setBlend(mainTerrain->getBlend() + 5.0f);
+                    mainTerrain->setBlend(mainTerrain->getBlend() + mainTerrain->getBlendResKeyboard());
+                    if (mainTerrain->getBlend() > 10.0f) mainTerrain->setBlendResKeyboard(5.0f);
+                    else mainTerrain->setBlendResKeyboard(1.0f);
                     break;
 
                 case sf::Keyboard::V:
-                    mainTerrain->setBlend(mainTerrain->getBlend() - 5.0f);
+                    mainTerrain->setBlend(mainTerrain->getBlend() - mainTerrain->getBlendResKeyboard());
                     if (mainTerrain->getBlend() < 0.0f) mainTerrain->setBlend(0.0f);
+                    if (mainTerrain->getBlend() <= 10.0f) mainTerrain->setBlendResKeyboard(1.0f);
+                    else mainTerrain->setBlendResKeyboard(5.0f);
                     break;
 
                 case sf::Keyboard::S:
                     writeTableToFile(mainTerrain->getSizeY(), mainTerrain->getSizeX(), mainTerrain->getHeightMap(), "Output/");
                     break;
 
+                case sf::Keyboard::T:
+                    mainTerrain->toggleIndicatorDraw();
+                    mainTerrain->generateColorMap();
+                    drawTerrain(&mainWin, mainTerrain, infoText);
+                    break;
 
                 default:
                     break;
@@ -111,10 +136,7 @@ void launchTerrainWindow(int width, int height, const char* filename) {
             }
 
         }
-        mainWin.win->clear(sf::Color::Black);
-        mainWin.win->draw(infoText);
-        drawTerrain(&mainWin, mainTerrain);
-        mainWin.win->display();
+        drawTerrain(&mainWin, mainTerrain, infoText);
     }
 
 }

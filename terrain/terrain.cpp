@@ -41,15 +41,20 @@ Terrain::Terrain(int sizeX, int sizeY, int octaves, float bias, float blend) {
 	this->sizeY = sizeY;
 	this->heightMap = new float[sizeX * sizeY];
 	this->colorMap = nullptr;
-	this->generateTerrain();
 	this->blend = blend;
 	this->octaves = octaves;
 	this->bias = bias;
+	this->drawHeightIndicators = false;
+	this->heightIndicatorList = new bool[256];
+	for (int i = 0; i < 256; i++) this->heightIndicatorList[i] = false;
+	this->blendResolKeyboard = 5.0f;
+	this->generateTerrain();
 }
 
 Terrain::~Terrain() {
 	if(this->colorMap != nullptr) delete this->colorMap;
 	delete this->heightMap;
+	delete this->heightIndicatorList;
 }
 
 void Terrain::generateTerrain() {
@@ -88,6 +93,10 @@ float Terrain::getBlend() {
 	return this->blend;
 }
 
+float Terrain::getBlendResKeyboard() {
+	return this->blendResolKeyboard;
+}
+
 void Terrain::setOctaves(int newOctaves) {
 	this->octaves = newOctaves;
 }
@@ -98,6 +107,20 @@ void Terrain::setBias(float newBias) {
 
 void Terrain::setBlend(float newBlend) {
 	this->blend = newBlend;
+}
+
+void Terrain::setBlendResKeyboard(float newBlendRes) {
+	this->blendResolKeyboard = newBlendRes;
+}
+
+void Terrain::setIndicatorList(int* list, int size) {
+	for (int i = 0; i < size; i++) {
+		this->heightIndicatorList[list[i]] = true;
+	} 
+}
+
+void Terrain::toggleIndicatorDraw() {
+	this->drawHeightIndicators = !this->drawHeightIndicators;
 }
 
 void Terrain::setHeightMap(float* newMap, int sizeX, int sizeY) {
@@ -117,14 +140,26 @@ void Terrain::generateColorMap() {
 
 	for (int y = 0; y < this->sizeY; y++) {
 		for (int x = 0; x < this->sizeX; x++) {
-			buffer = GetCorrespondingColor(this->heightMap[y * this->sizeX + x], this->blend);
-			this->colorMap[(y * sizeX + x) * 4] = buffer.r;
-			this->colorMap[(y * sizeX + x) * 4 + 1] = buffer.g;
-			this->colorMap[(y * sizeX + x) * 4 + 2] = buffer.b;
-			this->colorMap[(y * sizeX + x) * 4 + 3] = 255;
+			if (this->drawHeightIndicators && this->heightIndicatorList[(int)this->heightMap[y * this->sizeX + x]]) {
+				this->colorMap[(y * sizeX + x) * 4] = 0;
+				this->colorMap[(y * sizeX + x) * 4 + 1] = 0;
+				this->colorMap[(y * sizeX + x) * 4 + 2] = 0;
+				this->colorMap[(y * sizeX + x) * 4 + 3] = 255;
+			}
+			else {
+				buffer = GetCorrespondingColor(this->heightMap[y * this->sizeX + x], this->blend);
+				this->colorMap[(y * sizeX + x) * 4] = buffer.r;
+				this->colorMap[(y * sizeX + x) * 4 + 1] = buffer.g;
+				this->colorMap[(y * sizeX + x) * 4 + 2] = buffer.b;
+				this->colorMap[(y * sizeX + x) * 4 + 3] = 255;
+
+			}
+
 		}
+
 	}
 }
+
 
 void Terrain::makeSprite(sf::Sprite sprite) {
 	if (this->colorMap == nullptr) this->generateColorMap();

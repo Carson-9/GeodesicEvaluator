@@ -74,3 +74,28 @@ private:
 	sf::RectangleShape	representation;
 
 };
+
+class Slider : public windowSlaveObjects {
+	public:
+
+		Slider(int posX, int posY, int length, int height, float lower, float upper, sf::Color background, sf::Color sliderColor, windowHierarchy* linkedWindow);
+		~Slider();
+
+		void setSliderPos(float pos);
+
+
+		float getSliderPos();
+
+	private:
+
+		int length;
+		int height;
+
+		float lowerBound;
+		float upperBound;
+		
+		float sliderPos;
+
+		sf::RectangleShape bar;
+		sf::CircleShape slider;
+};

@@ -1,7 +1,5 @@
 #include "window/window.hpp"
 
-
-
 void press_printHello(sf::Event event, void* obj) {
     Button* button = (Button*)obj;
     int width = button->getWidth();
@@ -9,8 +7,7 @@ void press_printHello(sf::Event event, void* obj) {
     sf::Vector2i mousePos = sf::Mouse::getPosition(*button->linkedWindow->win);
     if (mousePos.x >= button->posX && mousePos.x <= button->posX + width) {
         if (mousePos.y >= button->posY && mousePos.y <= button->posY + height) {
-            button->setColor(sf::Color::Blue);
-            button->setColor(sf::Color::Green);
+            printf("Pressed!\n");
         }
     }
 }
