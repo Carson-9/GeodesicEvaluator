@@ -8,7 +8,7 @@ void buttonTestReaction(sf::Event event, windowSlaveObjects* obj) {
 
 void windowHierarchy::executeEvent(sf::Event event) {
     for (auto& currentObject : this->linkedObjects) {
-        if (currentObject != NULL && currentObject->reactsTo == event.type) {
+        if (currentObject != NULL && (currentObject->reactsTo & eventTypeToFlag(event.type)) != 0) {
             if (!currentObject->isReactionEmpty()) currentObject->react(event, (void*)currentObject);
         }
     }
@@ -107,7 +107,7 @@ Button::Button(int posX, int posY, int width, int height, sf::Color background, 
 
     this->linkedWindow = linkedWindow;
 
-    this->reactsTo = sf::Event::MouseButtonPressed;
+    this->reactsTo = eventTypeToFlag(sf::Event::MouseButtonPressed);
     this->representation = sf::RectangleShape();
     this->representation.setPosition(sf::Vector2f((float)posX, (float)posY));
     this->representation.setSize(sf::Vector2f((float)width, (float)height));
@@ -138,7 +138,8 @@ void Button::setColor(sf::Color color) {
 
 
 
-Slider::Slider(int posX, int posY, int length, int height, float lower, float upper, sf::Color background, sf::Color sliderColor, windowHierarchy* linkedWindow) {
+Slider::Slider(int posX, int posY, int length, int height, float lower, float upper, sf::Color background, sf::Color sliderColor, windowHierarchy* linkedWindow) : windowSlaveObjects(linkedWindow) {
+    
     this->posX = posX;
     this->posY = posY;
     this->length = length;
@@ -146,13 +147,30 @@ Slider::Slider(int posX, int posY, int length, int height, float lower, float up
 
     this->lowerBound = lower;
     this->upperBound = upper;
+    this->sliderRadius = height - 2;
 
+
+    this->bar = sf::RectangleShape();
+    this->bar.setPosition(sf::Vector2f((float)posX, (float)posY));
+    this->bar.setSize(sf::Vector2f((float)length, (float)height));
     this->bar.setFillColor(background);
-    this->slider.setFillColor(sliderColor);
-    this->slider.setOrigin(sf::Vector2f(posX, posY + (height/2.0f)));
 
-    this->reactsTo = sf::Event::MouseButtonPressed;
+    this->slider = sf::CircleShape();
+    this->slider.setRadius(height - 2);
+    this->slider.setFillColor(sliderColor);
+    this->slider.setPosition(sf::Vector2f(posX - height, posY - (height / 2)));
+
+    this->beingMoved = false;
+
+    this->reactsTo = 
+        eventTypeToFlag(sf::Event::MouseButtonPressed) + 
+        eventTypeToFlag(sf::Event::MouseMoved) + 
+        eventTypeToFlag(sf::Event::MouseButtonReleased);
+
     this->sliderPos = 0.0f;
+
+    this->linkedWindow = linkedWindow;
+
 }
 
 Slider::~Slider() {
@@ -165,5 +183,50 @@ float Slider::getSliderPos() {
 
 void Slider::setSliderPos(float pos) {
     this->sliderPos = pos;
-    this->slider.setPosition(pos * this->length , 0);
+    this->slider.setPosition(sf::Vector2f(this->posX + (pos * this->length) - this->height , this->posY - (this->height / 2) ));
+}
+
+void Slider::setSliderRadius(float r) {
+    this->sliderRadius = r;
+}
+
+void Slider::toggleBeingMoved() {
+    this->beingMoved = !this->beingMoved;
+}
+
+bool Slider::isBeingMoved() {
+    return this->beingMoved;
+}
+
+int Slider::getLength() {
+    return this->length;
+}
+
+int Slider::getHeight() {
+    return this->height;
+}
+
+float Slider::getSliderRadius() {
+    return this->sliderRadius;
+}
+
+float Slider::getValue() {
+    return this->lowerBound + (this->upperBound - this->lowerBound) * this->sliderPos;
+}
+
+sf::Vector2f Slider::getSliderAbsolutePos() {
+    return this->slider.getPosition();
+}
+
+float Slider::getLowerBound() {
+    return this->lowerBound;
+}
+
+float Slider::getUpperBound() {
+    return this->upperBound;
+}
+
+void Slider::drawFunction() {
+    this->linkedWindow->win->draw(this->bar);
+    this->linkedWindow->win->draw(this->slider);
 }

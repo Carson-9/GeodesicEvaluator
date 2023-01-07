@@ -8,6 +8,11 @@ class windowHierarchy;
 
 inline void DEFAULT_VOID_FUNCTION(sf::Event, void*) {}
 
+// Transforms sf::EventType into a Flag, used to quickly determine whether 
+// an object reacts to an eventType
+inline int eventTypeToFlag(sf::Event::EventType t) { return 1 << t; }
+
+
 class windowHierarchy {
 public:
 
@@ -42,7 +47,7 @@ public:
 	windowHierarchy*		linkedWindow;
 	int						posX;
 	int						posY;
-	sf::Event::EventType	reactsTo;
+	int						reactsTo;  //Flag
 	virtual void drawFunction();
 
 private:
@@ -82,19 +87,33 @@ class Slider : public windowSlaveObjects {
 		~Slider();
 
 		void setSliderPos(float pos);
-
+		void setSliderRadius(float r);
+		void toggleBeingMoved();
 
 		float getSliderPos();
+		int getLength();
+		int getHeight();
+		float getLowerBound();
+		float getUpperBound();
+		float getSliderRadius();
+		float getValue();
+		sf::Vector2f getSliderAbsolutePos();
+
+		bool isBeingMoved();
+		void drawFunction();
 
 	private:
 
 		int length;
 		int height;
+		float sliderRadius;
 
 		float lowerBound;
 		float upperBound;
 		
 		float sliderPos;
+
+		bool beingMoved;
 
 		sf::RectangleShape bar;
 		sf::CircleShape slider;

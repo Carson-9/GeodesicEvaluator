@@ -62,6 +62,7 @@ void launchTerrainWindow(int width, int height, const char* filename) {
 
     windowHierarchy mainWin(width, height, "TIPE");
     drawTerrain(&mainWin, mainTerrain, infoText);
+    mainWin.win->setKeyRepeatEnabled(true);
 
     while (mainWin.win->isOpen()) {
         sf::Event event;
@@ -70,7 +71,7 @@ void launchTerrainWindow(int width, int height, const char* filename) {
             //switch (event.type) {
 
             if (event.type == sf::Event::Closed) mainWin.win->close();
-            else if (event.type == sf::Event::KeyReleased) {
+            else if (event.type == sf::Event::KeyPressed) {
                 switch (event.key.code) {
 
                 case sf::Keyboard::Space:
