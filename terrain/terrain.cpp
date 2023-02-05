@@ -1,4 +1,4 @@
-#include "terrain/terrain.hpp"
+﻿#include "terrain/terrain.hpp"
 
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend) {
 
@@ -114,6 +114,7 @@ void Terrain::setBlendResKeyboard(float newBlendRes) {
 }
 
 void Terrain::setIndicatorList(int* list, int size) {
+	for (int i = 0; i < 256; i++) this->heightIndicatorList[i] = false;
 	for (int i = 0; i < size; i++) {
 		this->heightIndicatorList[list[i]] = true;
 	} 
@@ -181,3 +182,103 @@ void Terrain::generateFromFile(const char* fileName) {
 
 	delete[] terrainDim;
 } 
+
+
+void Terrain::generateOBJFile(const char* folderName, float heightScale) {
+	try {
+
+		auto now = std::chrono::system_clock::now();
+		const std::time_t end_time = std::chrono::system_clock::to_time_t(now);
+
+		char currentDate[64];
+		char fileName[128];
+
+		for (int i = 0; i < 127; i++) fileName[i] = ' ';
+		fileName[127] = '\0';
+
+		ctime_s(currentDate, 64 * sizeof(char), &end_time);
+
+		replaceCharInCharList(currentDate, 64, ' ', '_');
+		replaceCharInCharList(currentDate, 64, ':', '_');
+		replaceCharInCharList(currentDate, 64, '\n', '\0');
+		setFileFolder(fileName, 128, folderName);
+
+		int folderNameSize = getStringSize(folderName);
+		appendCharListToCharList(fileName, currentDate, 128, folderNameSize - 1);
+
+		addFileExtension(fileName, 128, ".obj");
+
+		std::ofstream newFile(fileName);
+
+		printf("File : %s opened\n", fileName);
+
+		std::stringstream buffer(std::stringstream::out | std::stringstream::binary);
+
+		if (newFile.is_open()) {
+
+			int completionPercent = 0;
+			int previous_completionPercent = 0;
+
+			// Writing the vertices
+
+			std::cout << "Writing the Vertices : \n";
+
+			for (int y = 0; y < sizeY; y++) {
+
+				buffer.str(std::string());
+				for (int x = 0; x < sizeX; x++) {
+					
+					if(this->heightMap[y * this->sizeX + x] < COLOR_HEIGHT_LIST[4])
+						buffer << "v " << std::to_string(y) << " " << std::to_string((heightScale * this->heightMap[y * this->sizeX + x]) - 1000) << " " << std::to_string(x) << "\n";
+					else
+						buffer << "v " << std::to_string(y) << " " << std::to_string(heightScale * this->heightMap[y * this->sizeX + x]) << " " << std::to_string(x) << "\n";
+				}
+
+				completionPercent = (int) (((float)y / (float)sizeY) * 23.0f) + 1;
+				newFile.write(buffer.str().c_str(), buffer.str().length());
+				if (completionPercent > previous_completionPercent) {
+					previous_completionPercent = completionPercent;
+					std::cout << "\33[2K\r[" << std::string(completionPercent, 'X') << std::string(23 - completionPercent, '.') << "] - " << ((float)completionPercent / 23.0f) * 100.0f << "% Done!" << std::flush;
+				}
+			}
+
+			std::cout << std::endl;
+			std::cout << "Writing the Faces : \n";
+			previous_completionPercent = 0;
+
+
+			// Writing the faces
+
+			for (int y = 0; y < sizeY - 1; y++) {
+				buffer.str(std::string());
+				for (int x = 0; x < sizeX - 1; x++) {
+					buffer << "f " << std::to_string(y * (this->sizeX) + x + 1) << " " << std::to_string(y * (this->sizeX) + x + 2) << " " << std::to_string((y + 1) * (this->sizeX) + x + 1) << "\n";
+					buffer << "f " << std::to_string(y * (this->sizeX) + x + 2) << " " << std::to_string((y+1) * (this->sizeX) + x + 2) << " " << std::to_string((y + 1) * (this->sizeX) + x + 1) << "\n";
+				}
+
+				completionPercent = (int)(((float)y / (float)sizeY) * 23.0f) + 1;
+
+				newFile.write(buffer.str().c_str(), buffer.str().length());
+				if (completionPercent > previous_completionPercent) {
+					previous_completionPercent = completionPercent;
+					std::cout << "\33[2K\r[" << std::string(completionPercent, 'X') << std::string(23 - completionPercent, '.') << "] - " << ((float)completionPercent / 23.0f) * 100.0f << "% Done!" << std::flush;
+				}
+			}
+
+			std::cout << std::endl;
+
+			printf("Wrote to file\n");
+			newFile.close();
+			printf("File closed\n");
+		}
+
+		else printf("Tried to write while file was not opened.\n");
+		return;
+	}
+
+
+	catch (...) {
+		printf("Could not print to file!");
+		return;
+	}
+}

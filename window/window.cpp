@@ -12,6 +12,18 @@ void press_printHello(sf::Event event, void* obj) {
     }
 }
 
+void press_saveOBJ(sf::Event event, void* obj) {
+    Button* button = (Button*)obj;
+    int width = button->getWidth();
+    int height = button->getHeight();
+    sf::Vector2i mousePos = sf::Mouse::getPosition(*button->linkedWindow->win);
+    if (mousePos.x >= button->posX && mousePos.x <= button->posX + width) {
+        if (mousePos.y >= button->posY && mousePos.y <= button->posY + height) {
+            button->toggleIsPressed();
+        }
+    }
+}
+
 void slider_move(sf::Event event, void* obj) {
 
     Slider* slider = (Slider*)obj;
@@ -43,12 +55,25 @@ void slider_move(sf::Event event, void* obj) {
     return;
 }
 
-void multiThreadedBaseWindow(void* args) {
-    int* realArgs = (int*)args;
-    baseWindow(realArgs[0], realArgs[1]);
+void generateFieldLines(Terrain* terrain, int FieldLineNumber) {
+    float step = 256.0f / FieldLineNumber;
+    int* fieldLines = new int[FieldLineNumber];
+    for (int i = 0; i < FieldLineNumber; i++) fieldLines[i] = i * step;
+    terrain->setIndicatorList(fieldLines, FieldLineNumber);
+    delete[] fieldLines;
+    terrain->generateColorMap();
 }
 
-void baseWindow(int width, int height) {
+
+
+void multiThreadedBaseWindow(void* args) {
+    controlWindowArgs* realArgs = (controlWindowArgs*)args;
+    baseWindow(realArgs->WIDTH, realArgs->HEIGHT, realArgs->terrain);
+}
+
+void baseWindow(int width, int height, Terrain* terrain) {
+
+    int FieldLineNumber = 1;
 
     sf::Font mainFont;
     sf::Text title;
@@ -71,9 +96,11 @@ void baseWindow(int width, int height) {
     mainWinSettings.antialiasingLevel = 8;
     windowHierarchy mainWin(width, height, "TIPE");
     Button button(200, 200, 300, 100, sf::Color::Green, sf::Color::Red, DEFAULT_FONT, "Press me!", &mainWin);
-    Slider slider(400, 400, 200, 25, 10.0f, 20.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
+    Button saveOBJ(600, 0, 200, 50, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Save to OBJ", &mainWin);
+    Slider slider(400, 400, 200, 25, 1.0f, 21.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
     
     button.setReaction(press_printHello);
+    saveOBJ.setReaction(press_saveOBJ);
     slider.setReaction(slider_move);
 
     mainWin.win->setKeyRepeatEnabled(true);
@@ -90,6 +117,17 @@ void baseWindow(int width, int height) {
         mainWin.win->draw(title);
         mainWin.drawObjects();
         mainWin.win->display();
+
+        int sliderVal = slider.getValue();
+        if ((int)sliderVal != FieldLineNumber) {
+            FieldLineNumber = (int)sliderVal;
+            generateFieldLines(terrain, FieldLineNumber);
+        }
+
+        if (saveOBJ.isBeingPressed()) {
+            saveOBJ.toggleIsPressed();
+            terrain->generateOBJFile("Output/", 2.0f);
+        }
 	}
 
     mainWin.clearOnClose();

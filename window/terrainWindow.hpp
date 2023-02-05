@@ -5,7 +5,7 @@
 typedef struct {
 	int WIDTH;
 	int HEIGHT;
-	const char* filename;
+	Terrain* terrain;
 	//threadpool* threads;
 } terrainWindowArgs;
 
@@ -18,4 +18,4 @@ void multiThreadDrawTerrain(void* args);
 void drawTerrain(windowHierarchy* win, Terrain* terrain, sf::Text text);
 
 void multiThreadLaunchTerrainWindow(void* args);
-void launchTerrainWindow(int width, int height, const char* filename);
+void launchTerrainWindow(int width, int height, Terrain* mainTerrain);

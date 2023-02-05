@@ -2,6 +2,14 @@
 #include "utilitaries/pseudoPerlin.hpp"
 #include "utilitaries/utilLib.hpp"
 #include "utilitaries/stringManipulation.hpp"
+#include <sstream>
+
+
+class Town {
+	public:
+		int x;
+		int y;
+};
 
 class Terrain {
 	public:
@@ -12,6 +20,7 @@ class Terrain {
 		void generateTerrain();
 		void generateColorMap();
 		void generateFromFile(const char* fileName);
+		void generateOBJFile(const char* fileName, float heightScale);
 		int getSizeX();
 		int getSizeY();
 		int getOctaves();

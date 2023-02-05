@@ -25,17 +25,15 @@ void drawTerrain(windowHierarchy* win, Terrain* terrain, sf::Text infoText) {
 
 void multiThreadLaunchTerrainWindow(void* args) {
 	terrainWindowArgs* trueArgs = (terrainWindowArgs*)args;
-	launchTerrainWindow(trueArgs->WIDTH, trueArgs->HEIGHT, trueArgs->filename);
+	launchTerrainWindow(trueArgs->WIDTH, trueArgs->HEIGHT, trueArgs->terrain);
 }
 
-void launchTerrainWindow(int width, int height, const char* filename) {
+void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
 
     sf::Text infoText;
     sf::Font mainFont;
 
     char infoString[128];
-
-    Terrain* mainTerrain = new Terrain(width, height, 8, 1.4f, 100.0f);
 
     if (!mainFont.loadFromFile(DEFAULT_FONT)) {
         printf("Error, unrecognized font!");
@@ -51,11 +49,6 @@ void launchTerrainWindow(int width, int height, const char* filename) {
 
     //mainTerrain->generateFromFile("Output/tGreece.txt");
     mainTerrain->generateColorMap();
-
-
-    int heightToDraw[] = {25, 50, 75, 100, 125, 150, 175, 200};
-    mainTerrain->setIndicatorList(heightToDraw, 8);
-
 
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", mainTerrain->getOctaves(), mainTerrain->getBias(), (int)mainTerrain->getBlend());
     infoText.setString(infoString);

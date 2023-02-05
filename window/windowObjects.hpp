@@ -69,11 +69,14 @@ public:
 	int getHeight();
 	
 	void setColor(sf::Color color);
+	void toggleIsPressed();
+	bool isBeingPressed();
 	void drawFunction();
 
 private:
 	int					width;
 	int					height;
+	bool				isPressed;
 	sf::Text			textObject;
 	sf::Font			textFont;
 	sf::RectangleShape	representation;

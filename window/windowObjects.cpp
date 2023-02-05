@@ -9,7 +9,9 @@ void buttonTestReaction(sf::Event event, windowSlaveObjects* obj) {
 void windowHierarchy::executeEvent(sf::Event event) {
     for (auto& currentObject : this->linkedObjects) {
         if (currentObject != NULL && (currentObject->reactsTo & eventTypeToFlag(event.type)) != 0) {
-            if (!currentObject->isReactionEmpty()) currentObject->react(event, (void*)currentObject);
+            if (!currentObject->isReactionEmpty()) {
+                currentObject->react(event, (void*)currentObject);
+            }
         }
     }
 }
@@ -92,6 +94,7 @@ Button::Button(int posX, int posY, int width, int height, sf::Color background, 
     this->posY = posY;
     this->width = width;
     this->height = height;
+    this->isPressed = false;
 
     if (!this->textFont.loadFromFile(fontName)) printf("Error, unrecognized font!");
     
@@ -135,7 +138,13 @@ void Button::setColor(sf::Color color) {
     this->representation.setFillColor(color);
 }
 
+void Button::toggleIsPressed() {
+    this->isPressed = !this->isPressed;
+}
 
+bool Button::isBeingPressed() {
+    return this->isPressed;
+}
 
 
 Slider::Slider(int posX, int posY, int length, int height, float lower, float upper, sf::Color background, sf::Color sliderColor, windowHierarchy* linkedWindow) : windowSlaveObjects(linkedWindow) {
