@@ -2,14 +2,26 @@
 #include "utilitaries/pseudoPerlin.hpp"
 #include "utilitaries/utilLib.hpp"
 #include "utilitaries/stringManipulation.hpp"
+#include "utilitaries/types.hpp"
 #include <sstream>
 
 
-class Town {
-	public:
-		int x;
-		int y;
+#define DOWN_OFFSET 1000
+#define PATH_PRECISION 1000
+
+struct Point {
+	f32 x;
+	f32 y;
+	f32 z;
 };
+
+struct Path {
+	Point	startingPoint;
+	Point	endPoint;
+	Point* points;
+	i16		precision;
+};
+
 
 class Terrain {
 	public:
@@ -21,6 +33,7 @@ class Terrain {
 		void generateColorMap();
 		void generateFromFile(const char* fileName);
 		void generateOBJFile(const char* fileName, float heightScale);
+		void generatePath();
 		int getSizeX();
 		int getSizeY();
 		int getOctaves();
@@ -30,6 +43,8 @@ class Terrain {
 
 		float* getHeightMap();
 		sf::Uint8* getColorMap();
+		Point* getPointA();
+		Point* getPointB();
 
 		void setOctaves(int newOctaves);
 		void setBias(float newBias);
@@ -37,25 +52,33 @@ class Terrain {
 		void setHeightMap(float* newMap, int sizeX, int sizeY);
 		void setBlendResKeyboard(float newBlendRes);
 		void setIndicatorList(int* list, int size);
+		void setPoints(Point* a, Point* b);
 
 		void toggleIndicatorDraw();
 
 		void makeSprite(sf::Sprite sprite);
 
 
+		f32 surfaceFunction(Point* p);
+		void fillPoint(Point* p);
+
+
 	private:
-		int sizeX;
-		int sizeY;
-		float* heightMap;
-		int octaves;
-		float bias;
-		float blend;
-		float blendResolKeyboard;
-		bool drawHeightIndicators;
-		bool* heightIndicatorList; //Faster checkup with a boolean associated to the height
-		sf::Uint8* colorMap;
-		sf::Image img;
-		sf::Texture tex;
+		int			sizeX;
+		int			sizeY;
+		float*		heightMap;
+		int			octaves;
+		float		bias;
+		float		blend;
+		float		blendResolKeyboard;
+		bool		drawHeightIndicators;
+		bool*		heightIndicatorList; //Faster checkup with a boolean associated to the height
+		sf::Uint8*	colorMap;
+		sf::Image	img;
+		sf::Texture	tex;
+
+		Point*		pointA;
+		Point*		pointB;
 };
 
 
@@ -79,3 +102,8 @@ const sf::Color SNOW(255, 255, 255, 255);
 const int COLOR_NUMBER = 11;
 const sf::Color COLOR_LIST[] = { DEEP_SEA, LOW_SEA, MID_SEA, UP_SEA, TOP_SEA, SAND, LIGHT_GRASS, DARK_GRASS, ROCK, STONE, SNOW };
 const float COLOR_HEIGHT_LIST[] = {0.0f, 20.5f, 40.8f, 61.2f, 71.6f, 76.0f, 86.5f, 125.5f, 168.5f, 210.0f, 234.6f};
+
+
+const f32 CUTTING_HEIGHT = (COLOR_HEIGHT_LIST[5] + COLOR_HEIGHT_LIST[4]) / 2.0f;
+
+const sf::Color PATH_COLOR(255, 0, 0);

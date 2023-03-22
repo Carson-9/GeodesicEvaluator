@@ -1,13 +1,13 @@
 #include "window/window.hpp"
 
-void press_printHello(sf::Event event, void* obj) {
+void press_drawStraightLine(sf::Event event, void* obj) {
     Button* button = (Button*)obj;
     int width = button->getWidth();
     int height = button->getHeight();
     sf::Vector2i mousePos = sf::Mouse::getPosition(*button->linkedWindow->win);
     if (mousePos.x >= button->posX && mousePos.x <= button->posX + width) {
         if (mousePos.y >= button->posY && mousePos.y <= button->posY + height) {
-            printf("Pressed!\n");
+            button->toggleIsPressed();
         }
     }
 }
@@ -58,7 +58,7 @@ void slider_move(sf::Event event, void* obj) {
 void generateFieldLines(Terrain* terrain, int FieldLineNumber) {
     float step = 256.0f / FieldLineNumber;
     int* fieldLines = new int[FieldLineNumber];
-    for (int i = 0; i < FieldLineNumber; i++) fieldLines[i] = i * step;
+    for (int i = 0; i < FieldLineNumber; i++) fieldLines[i] = (int)(i * step);
     terrain->setIndicatorList(fieldLines, FieldLineNumber);
     delete[] fieldLines;
     terrain->generateColorMap();
@@ -94,12 +94,13 @@ void baseWindow(int width, int height, Terrain* terrain) {
 
     sf::ContextSettings mainWinSettings;
     mainWinSettings.antialiasingLevel = 8;
-    windowHierarchy mainWin(width, height, "TIPE");
-    Button button(200, 200, 300, 100, sf::Color::Green, sf::Color::Red, DEFAULT_FONT, "Press me!", &mainWin);
-    Button saveOBJ(600, 0, 200, 50, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Save to OBJ", &mainWin);
-    Slider slider(400, 400, 200, 25, 1.0f, 21.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
+    windowHierarchy mainWin(width, height, "TIPE", sf::Vector2i(80,80));
     
-    button.setReaction(press_printHello);
+    Button drawPathButton(550, 175, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Straight Path", &mainWin);
+    Button saveOBJ(550, 50, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Save to OBJ", &mainWin);
+    Slider slider(400, 400, 200, 25, 1.0f, 21.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
+
+    drawPathButton.setReaction(press_drawStraightLine);
     saveOBJ.setReaction(press_saveOBJ);
     slider.setReaction(slider_move);
 
@@ -127,6 +128,11 @@ void baseWindow(int width, int height, Terrain* terrain) {
         if (saveOBJ.isBeingPressed()) {
             saveOBJ.toggleIsPressed();
             terrain->generateOBJFile("Output/", 2.0f);
+        }
+
+        if (drawPathButton.isBeingPressed()) {
+            drawPathButton.toggleIsPressed();
+            terrain->generatePath();
         }
 	}
 

@@ -16,11 +16,14 @@ void windowHierarchy::executeEvent(sf::Event event) {
     }
 }
 
-windowHierarchy::windowHierarchy(int width, int height, const char* title) {
+windowHierarchy::windowHierarchy(int width, int height, const char* title, sf::Vector2i ScreenPos) {
 
     this->win = new sf::RenderWindow(sf::VideoMode(width, height), title);
     this->linkedObjects = std::vector<windowSlaveObjects*>();
     this->vectorSize = 0;
+    this->Width = width;
+    this->Height = height;
+    this->win->setPosition(ScreenPos);
 }
 
 windowHierarchy::windowHierarchy(sf::RenderWindow* win) {
@@ -96,14 +99,19 @@ Button::Button(int posX, int posY, int width, int height, sf::Color background, 
     this->height = height;
     this->isPressed = false;
 
+    i8 character_size = 24;
+    i8 text_size = getStringSize(text);
+
     if (!this->textFont.loadFromFile(fontName)) printf("Error, unrecognized font!");
     
 
     this->textObject = sf::Text();
     this->textObject.setString(sf::String(text));
-    this->textObject.setPosition(sf::Vector2f((float)posX,(float)posY));
     this->textObject.setFillColor(textColor);
-    this->textObject.setCharacterSize(24);
+    this->textObject.setCharacterSize(character_size);
+    this->textObject.setPosition(sf::Vector2f(
+        (float)posX + (width / 2) - (character_size * (text_size / 3)),
+        (float)posY + (height / 2) - (character_size / 2)));
     this->textObject.setFont(this->textFont);
     this->textObject.setStyle(sf::Text::Bold);
     //centerText(this->textObject, sf::Vector2f((float)(this->posX + 2 * this->width)/ 2.0f, ((float)(this->posY + 2 * this->height)/ 2.0f)));
@@ -238,4 +246,69 @@ float Slider::getUpperBound() {
 void Slider::drawFunction() {
     this->linkedWindow->win->draw(this->bar);
     this->linkedWindow->win->draw(this->slider);
+}
+
+
+WindowPoint::WindowPoint(f32 posX, f32 posY, f32 radius, sf::Color pointColor, windowHierarchy* linkedWindow) : windowSlaveObjects(linkedWindow) {
+
+    this->posX = posX;
+    this->posY = posY;
+    this->beingMoved = false;
+    this->radius = radius;
+
+    this->actualPoint = Point{ posX, posY, 0 };
+
+    this->shape = sf::CircleShape();
+    this->shape.setRadius(radius);
+    this->shape.setFillColor(pointColor);
+    this->shape.setPosition(sf::Vector2f(posX, posY));
+
+    this->reactsTo =
+        eventTypeToFlag(sf::Event::MouseButtonPressed) +
+        eventTypeToFlag(sf::Event::MouseMoved) +
+        eventTypeToFlag(sf::Event::MouseButtonReleased);
+
+    this->linkedWindow = linkedWindow;
+}
+
+WindowPoint::~WindowPoint() {
+
+}
+
+f32 WindowPoint::getX() {
+    return this->posX;
+}
+
+f32 WindowPoint::getY() {
+    return this->posY;
+}
+
+f32 WindowPoint::getRadius() {
+    return this->radius;
+}
+
+bool WindowPoint::isBeingMoved() {
+    return this->beingMoved;
+}
+
+void WindowPoint::drawFunction() {
+    //printf("X : %f; Y : %f\n", this->getX(), this->getY());
+    this->linkedWindow->win->draw(this->shape);
+}
+
+void WindowPoint::toggleBeingMoved() {
+    this->beingMoved = !this->beingMoved;
+}
+
+
+void WindowPoint::setPosition(f32 x, f32 y) {
+    this->actualPoint.x = x + this->radius;
+    this->actualPoint.y = y + this->radius;
+    this->posX = x;
+    this->posY = y;
+    this->shape.setPosition(sf::Vector2f(x, y));
+}
+
+Point* WindowPoint::getReference() {
+    return &this->actualPoint;
 }

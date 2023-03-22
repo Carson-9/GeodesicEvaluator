@@ -1,6 +1,44 @@
 #include "window/terrainWindow.hpp"
 
 
+void pointMove(sf::Event event, void* obj) {
+    WindowPoint* pt = (WindowPoint*)obj;
+
+    sf::Vector2i mousePos = sf::Mouse::getPosition(*pt->linkedWindow->win);
+    f32 radius = pt->getRadius();
+
+    f32 pointX = pt->getX() + radius;
+    f32 pointY = pt->getY() + radius;
+
+    if (!pt->isBeingMoved() && !((mousePos.x - pointX) * (mousePos.x - pointX)
+        + (mousePos.y - pointY) * (mousePos.y - pointY) <= (radius * radius))) 
+        return;
+    
+
+    if (event.type == sf::Event::MouseButtonPressed && !pt->isBeingMoved()) {
+        pt->toggleBeingMoved();
+        return;
+    }
+
+    if (event.type == sf::Event::MouseButtonReleased && pt->isBeingMoved()) {
+        pt->toggleBeingMoved();
+        return;
+    }
+
+    if (event.type == sf::Event::MouseMoved && pt->isBeingMoved()) {
+        pt->setPosition(
+            CLAMP((f32)mousePos.x - radius, -radius, pt->linkedWindow->Width - radius),
+            CLAMP((f32)mousePos.y - radius, -radius, pt->linkedWindow->Height - radius));
+        return;
+    }
+
+}
+
+
+
+
+
+
 void multiThreadDrawTerrain(void* args) {
     drawTerrainArgs* realArgs = (drawTerrainArgs*)args;
     drawTerrain(realArgs->win, realArgs->terrain, sf::Text());
@@ -17,7 +55,6 @@ void drawTerrain(windowHierarchy* win, Terrain* terrain, sf::Text infoText) {
     win->win->clear(sf::Color::Black);
     win->win->draw(background);
     win->win->draw(infoText);
-    win->win->display();
     return;
 }
 
@@ -47,21 +84,33 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     sf::Vector2f infoTextPos(4.0f, 4.0f);
     infoText.setPosition(infoTextPos);
 
-    //mainTerrain->generateFromFile("Output/tGreece.txt");
+    mainTerrain->generateFromFile("Output/tGreece.txt");
     mainTerrain->generateColorMap();
 
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", mainTerrain->getOctaves(), mainTerrain->getBias(), (int)mainTerrain->getBlend());
     infoText.setString(infoString);
 
-    windowHierarchy mainWin(width, height, "TIPE");
+    windowHierarchy mainWin(width, height, "TIPE - Terrain", sf::Vector2i(900, 0));
     drawTerrain(&mainWin, mainTerrain, infoText);
     mainWin.win->setKeyRepeatEnabled(true);
+
+
+    WindowPoint pointA(0, 0, 15.0f, sf::Color::Red, &mainWin);
+    WindowPoint pointB((f32)width / 2 + 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
+
+    mainTerrain->setPoints(pointA.getReference(), pointB.getReference());
+
+    pointA.setReaction(pointMove);
+    pointB.setReaction(pointMove);
+
 
     while (mainWin.win->isOpen()) {
         sf::Event event;
         while (mainWin.win->pollEvent(event))
         {
             //switch (event.type) {
+
+            mainWin.executeEvent(event);
 
             if (event.type == sf::Event::Closed) mainWin.win->close();
             else if (event.type == sf::Event::KeyPressed) {
@@ -130,7 +179,10 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
             }
 
         }
+
         drawTerrain(&mainWin, mainTerrain, infoText);
+        mainWin.drawObjects();
+        mainWin.win->display();
     }
 
 }

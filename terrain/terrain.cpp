@@ -1,4 +1,6 @@
 ﻿#include "terrain/terrain.hpp"
+#include "Path/path.hpp"
+
 
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend) {
 
@@ -184,6 +186,34 @@ void Terrain::generateFromFile(const char* fileName) {
 } 
 
 
+f32 Terrain::surfaceFunction(Point* p) {
+
+	if (this->heightMap == nullptr) this->generateTerrain();
+
+	i32 round_x = (i32)floor(p->x);
+	i32 round_y = (i32)floor(p->y);
+
+	i32 a = round_y * this->sizeX + round_x;
+	i32 b = a + 1;
+	i32 c = a + this->sizeX;
+	i32 d = c + 1;
+
+	
+	f32 xSlope1 = (this->heightMap[b] - this->heightMap[a]);
+	f32 xSlope2 = (this->heightMap[d] - this->heightMap[c]);
+	
+	f32 ySlope = ((xSlope2 * (p->x - round_x) + this->heightMap[c]) 
+		- (xSlope1 * (p->x - round_x) + this->heightMap[a]));
+
+	return (ySlope * (p->y - round_y) + (xSlope1 * (p->x - round_x) + this->heightMap[a]));
+}
+
+
+void Terrain::fillPoint(Point* p) {
+	p->z = surfaceFunction(p);
+}
+
+
 void Terrain::generateOBJFile(const char* folderName, float heightScale) {
 	try {
 
@@ -228,8 +258,8 @@ void Terrain::generateOBJFile(const char* folderName, float heightScale) {
 				buffer.str(std::string());
 				for (int x = 0; x < sizeX; x++) {
 					
-					if(this->heightMap[y * this->sizeX + x] < COLOR_HEIGHT_LIST[4])
-						buffer << "v " << std::to_string(y) << " " << std::to_string((heightScale * this->heightMap[y * this->sizeX + x]) - 1000) << " " << std::to_string(x) << "\n";
+					if(this->heightMap[y * this->sizeX + x] < CUTTING_HEIGHT)
+						buffer << "v " << std::to_string(y) << " " << std::to_string((heightScale * this->heightMap[y * this->sizeX + x]) - DOWN_OFFSET) << " " << std::to_string(x) << "\n";
 					else
 						buffer << "v " << std::to_string(y) << " " << std::to_string(heightScale * this->heightMap[y * this->sizeX + x]) << " " << std::to_string(x) << "\n";
 				}
@@ -280,5 +310,34 @@ void Terrain::generateOBJFile(const char* folderName, float heightScale) {
 	catch (...) {
 		printf("Could not print to file!");
 		return;
+	}
+}
+
+
+void Terrain::setPoints(Point* a, Point* b) {
+	this->pointA = a;
+	this->pointB = b;
+}
+
+Point* Terrain::getPointA() {
+	return this->pointA;
+}
+
+Point* Terrain::getPointB() {
+	return this->pointB;
+}
+
+void Terrain::generatePath() {
+	Path* path = initializePath(PATH_PRECISION, *this->pointA, *this->pointB, this);
+	if (!path) return;
+	this->generateColorMap(); // RESET IN CASE OF PATH
+
+	for (int point = 1; point < path->precision - 1; point++) {
+		i32 coord = ((int)floor(path->points[point].y) * this->sizeX + (int)floor(path->points[point].x)) * 4;
+		//printf("Point : %d, Coord : %d, Point.x = %f, Point.y = %f\n", point, coord, path->points[point].x, path->points[point].y);
+		this->colorMap[coord] = PATH_COLOR.r;
+		this->colorMap[coord + 1] = PATH_COLOR.g;
+		this->colorMap[coord + 2] = PATH_COLOR.b;
+		this->colorMap[coord + 3] = 255;	//ALPHA
 	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "window/window.hpp"
 #include "terrain/terrain.hpp"
+#include "utilitaries/utilLib.hpp"
 
 typedef struct {
 	int WIDTH;

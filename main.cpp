@@ -5,8 +5,8 @@
 
 int main()
 {
-    const int WIDTH = 1000;
-    const int HEIGHT = 1000;
+    const int WIDTH = 1000;     // 1000
+    const int HEIGHT = 1000;    // 1000
     const int octaves = 8;
     const float bias = 1.8f;
     const float sigmoidBlend = 100.f;

@@ -2,6 +2,8 @@
 
 #include "utilitaries/stringManipulation.hpp"
 #include "SFML-Complements.hpp"
+#include "utilitaries/types.hpp"
+#include "terrain/terrain.hpp"
 
 class windowSlaveObjects;
 class windowHierarchy;
@@ -16,7 +18,7 @@ inline int eventTypeToFlag(sf::Event::EventType t) { return 1 << t; }
 class windowHierarchy {
 public:
 
-	windowHierarchy(int width, int height, const char* title);
+	windowHierarchy(int width, int height, const char* title, sf::Vector2i ScreenPos);
 	windowHierarchy(sf::RenderWindow* win);
 
 	~windowHierarchy();
@@ -28,6 +30,9 @@ public:
 	void executeEvent(sf::Event event);
 	void drawObjects();
 	void clearOnClose();
+
+	int Width;
+	int Height;
 
 private:
 };
@@ -107,17 +112,45 @@ class Slider : public windowSlaveObjects {
 
 	private:
 
-		int length;
-		int height;
-		float sliderRadius;
-
-		float lowerBound;
-		float upperBound;
-		
-		float sliderPos;
-
-		bool beingMoved;
+		int		length;
+		int		height;
+		float	sliderRadius;
+		float	lowerBound;
+		float	upperBound;
+		float	sliderPos;
+		bool	beingMoved;
 
 		sf::RectangleShape bar;
 		sf::CircleShape slider;
+};
+
+
+class WindowPoint : public windowSlaveObjects {
+
+public:
+
+	WindowPoint(f32 posX, f32 posY, f32 radius, sf::Color pointColor, windowHierarchy* linkedWindow);
+	~WindowPoint();
+
+	f32 getX();
+	f32 getY();
+	f32 getRadius();
+
+	bool isBeingMoved();
+	void drawFunction();
+	void setPosition(f32 x, f32 y);
+	void toggleBeingMoved();
+
+	Point* getReference();
+
+
+private:
+
+	b8 beingMoved;
+	f32 radius;
+
+	Point actualPoint;
+
+	sf::CircleShape shape;
+
 };
