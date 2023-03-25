@@ -95,7 +95,7 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     mainWin.win->setKeyRepeatEnabled(true);
 
 
-    WindowPoint pointA(0, 0, 15.0f, sf::Color::Red, &mainWin);
+    WindowPoint pointA((f32)width / 2 - 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
     WindowPoint pointB((f32)width / 2 + 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
 
     mainTerrain->setPoints(pointA.getReference(), pointB.getReference());
