@@ -372,7 +372,7 @@ void Terrain::drawLine(Point* a, Point* b) {
 	f32 minCoord, maxCoord;
 
 
-	if (difference.x == 0) {
+	if (difference.x == 0.0f) {
 		if (difference.y >= 0) {
 			minCoord = a->y;
 			maxCoord = b->y;
@@ -538,6 +538,7 @@ void Terrain::best_path() {
 		return;
 	}
 
+	this->generateColorMap(); // RESET IN CASE OF PATH
 	f64 length = computePathLength(path);
 
 	for (int point = 0; point < path->precision - 1; point++) {
