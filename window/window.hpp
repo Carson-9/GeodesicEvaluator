@@ -3,6 +3,7 @@
 #include "window/windowObjects.hpp"
 #include "multithreading/threadpool.hpp"
 #include "terrain/terrain.hpp"
+#include "Solver/solver.hpp"
 
 typedef struct {
 	int WIDTH;

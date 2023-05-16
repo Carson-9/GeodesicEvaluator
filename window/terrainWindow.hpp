@@ -2,6 +2,7 @@
 #include "window/window.hpp"
 #include "terrain/terrain.hpp"
 #include "utilitaries/utilLib.hpp"
+#include "utilitaries/bezier.hpp"
 
 typedef struct {
 	int WIDTH;

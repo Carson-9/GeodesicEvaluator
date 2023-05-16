@@ -36,9 +36,6 @@ void pointMove(sf::Event event, void* obj) {
 
 
 
-
-
-
 void multiThreadDrawTerrain(void* args) {
     drawTerrainArgs* realArgs = (drawTerrainArgs*)args;
     drawTerrain(realArgs->win, realArgs->terrain, sf::Text());
@@ -84,8 +81,8 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     sf::Vector2f infoTextPos(4.0f, 4.0f);
     infoText.setPosition(infoTextPos);
 
-    mainTerrain->generateFromFile("Output/tGreece.txt");
-    mainTerrain->generateColorMap();
+    //mainTerrain->generateFromFile("Output/tGreece.txt");
+    //mainTerrain->generateColorMap();
 
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", mainTerrain->getOctaves(), mainTerrain->getBias(), (int)mainTerrain->getBlend());
     infoText.setString(infoString);
@@ -98,11 +95,11 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     WindowPoint pointA((f32)width / 2 - 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
     WindowPoint pointB((f32)width / 2 + 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
 
+
     mainTerrain->setPoints(pointA.getReference(), pointB.getReference());
 
     pointA.setReaction(pointMove);
     pointB.setReaction(pointMove);
-
 
     while (mainWin.win->isOpen()) {
         sf::Event event;
@@ -183,6 +180,7 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
         drawTerrain(&mainWin, mainTerrain, infoText);
         mainWin.drawObjects();
         mainWin.win->display();
+
     }
 
 }

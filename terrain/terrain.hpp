@@ -3,24 +3,14 @@
 #include "utilitaries/utilLib.hpp"
 #include "utilitaries/stringManipulation.hpp"
 #include "utilitaries/types.hpp"
+#include "utilitaries/bezier.hpp"
 #include <sstream>
 
 
-#define DOWN_OFFSET 1000
-#define PATH_PRECISION 1000
-
-struct Point {
-	f32 x;
-	f32 y;
-	f32 z;
-};
-
-struct Path {
-	Point	startingPoint;
-	Point	endPoint;
-	Point* points;
-	i16		precision;
-};
+#define DOWN_OFFSET 100000
+#define PATH_PRECISION 500
+#define DISTANCE_CALCULATION_PRECISION 500
+#define DELTA_PRECISION 1
 
 
 class Terrain {
@@ -40,11 +30,14 @@ class Terrain {
 		float getBias();
 		float getBlend();
 		float getBlendResKeyboard();
+		bool isInScreen(Point* a);
 
 		float* getHeightMap();
 		sf::Uint8* getColorMap();
 		Point* getPointA();
 		Point* getPointB();
+		void drawLine(Point* a, Point* b);
+		void drawPath(void* p);
 
 		void setOctaves(int newOctaves);
 		void setBias(float newBias);
@@ -53,6 +46,13 @@ class Terrain {
 		void setBlendResKeyboard(float newBlendRes);
 		void setIndicatorList(int* list, int size);
 		void setPoints(Point* a, Point* b);
+
+		void naivePath();
+
+		void drawBezier(bezier3 b);
+		void bezierPath();
+
+		void best_path();
 
 		void toggleIndicatorDraw();
 
@@ -82,6 +82,14 @@ class Terrain {
 };
 
 
+struct Path {
+	Point	 startingPoint;
+	Point	 endPoint;
+	Point* points;
+	i16		 precision;
+	Terrain* linkedTerrain;
+};
+
 
 void colorTerrain(int sizeX, int sizeY, sf::Uint8* pixelArray, float sigmoidBlend);
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend);
@@ -101,9 +109,20 @@ const sf::Color SNOW(255, 255, 255, 255);
 
 const int COLOR_NUMBER = 11;
 const sf::Color COLOR_LIST[] = { DEEP_SEA, LOW_SEA, MID_SEA, UP_SEA, TOP_SEA, SAND, LIGHT_GRASS, DARK_GRASS, ROCK, STONE, SNOW };
-const float COLOR_HEIGHT_LIST[] = {0.0f, 20.5f, 40.8f, 61.2f, 71.6f, 76.0f, 86.5f, 125.5f, 168.5f, 210.0f, 234.6f};
+const float COLOR_HEIGHT_LIST[] = {
+	0.0f, 
+	20.5f, 
+	40.8f,
+	61.2f, 
+	71.6f, 
+	76.0f, 
+	86.5f, 
+	125.5f, 
+	168.5f, 
+	210.0f, 
+	234.6f};
 
 
-const f32 CUTTING_HEIGHT = (COLOR_HEIGHT_LIST[5] + COLOR_HEIGHT_LIST[4]) / 2.0f;
+const f32 CUTTING_HEIGHT = ((COLOR_HEIGHT_LIST[5] + COLOR_HEIGHT_LIST[4]) / 2.0f);
 
-const sf::Color PATH_COLOR(255, 0, 0);
+const sf::Color PATH_COLOR(255, 0, 0, 255);

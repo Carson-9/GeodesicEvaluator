@@ -7,3 +7,15 @@ float cheapExp(float x) {
 float sigmoid(float x, float max, float midpoint, float steepness) {
 	return (float)(max / (1 + exp(-steepness * (x - midpoint))));
 }
+
+void SWAP(float* a, float* b) {
+	float temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
+void SWAP(int* a, int* b) {
+	int temp = *a;
+	*a = *b;
+	*b = temp;
+}

@@ -35,7 +35,7 @@ void setFileFolder(char* to_format, int allocatedChars, const char folderName[])
 int getStringSize(const char string[]) {
 	int count = 0;
 	while (string[count++] != '\0') {}
-	return (count - 1);
+	return count;
 }
 
 void appendCharListToCharList(char* receiver, char* to_add, int size_receiver, int indexToAdd) {

@@ -181,7 +181,15 @@ void generateHeightMap(int sizeX, int sizeY, int octaves, float bias, float* hei
 	for (int y = 0; y < sizeY; y++) 
 		for (int x = 0; x < sizeX; x++) 
 			heightMap[y * sizeX + x] = terrainN[y * sizeX + x] * 255.0f;
-
+	/*
+	for (int y = 1; y < sizeY - 1; y++)
+		for (int x = 1; x < sizeX - 1; x++)
+			heightMap[y * sizeX + x] = ((
+				terrainN[(y - 1) * sizeX + (x - 1)] + terrainN[(y - 1) * sizeX + x] + terrainN[(y - 1) * sizeX + (x + 1)] +
+				terrainN[y * sizeX + (x - 1)] + terrainN[y * sizeX + x] + terrainN[y * sizeX + (x + 1)] +
+				terrainN[(y + 1) * sizeX + (x - 1)] + terrainN[(y + 1) * sizeX + x] + terrainN[(y + 1) * sizeX + (x + 1)]
+				) / 8) * 512.0f;
+	*/
 	delete[] terrainN;
 	delete[] seed;
 }

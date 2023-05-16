@@ -1,19 +1,19 @@
 #include "window/window.hpp"
-#include "utilitaries/algebra.hpp"
 #include "terrain/terrain.hpp"
 #include "window/terrainWindow.hpp"
 
 int main()
 {
+
     const int WIDTH = 1000;     // 1000
     const int HEIGHT = 1000;    // 1000
-    const int octaves = 8;
-    const float bias = 1.8f;
+    const int octaves = 10;
+    const float bias = 1.6f;
     const float sigmoidBlend = 100.f;
 
     threadpool* threads = threadpool_init(16);
 
-    Terrain* mainTerrain = new Terrain(WIDTH, HEIGHT, 8, 1.8f, 100.0f);
+    Terrain* mainTerrain = new Terrain(WIDTH, HEIGHT, octaves, bias, sigmoidBlend);
     controlWindowArgs controlWinArg = { 800, 800, mainTerrain };
     terrainWindowArgs terrainWinArgs = { WIDTH, HEIGHT, mainTerrain};
 

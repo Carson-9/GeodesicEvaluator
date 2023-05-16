@@ -1,5 +1,6 @@
 ﻿#include "terrain/terrain.hpp"
 #include "Path/path.hpp"
+#include "Solver/solver.hpp"
 
 
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend) {
@@ -39,6 +40,12 @@ void colorTerrain(int sizeX, int sizeY, sf::Uint8* pixelArray, float sigmoidBlen
 }
 
 Terrain::Terrain(int sizeX, int sizeY, int octaves, float bias, float blend) {
+
+	// Set RNG with EPOCH
+
+	const auto GLOBAL_TIME = std::chrono::system_clock::now();
+	srand(std::chrono::duration_cast<std::chrono::seconds>(GLOBAL_TIME.time_since_epoch()).count());
+
 	this->sizeX = sizeX;
 	this->sizeY = sizeY;
 	this->heightMap = new float[sizeX * sizeY];
@@ -51,6 +58,7 @@ Terrain::Terrain(int sizeX, int sizeY, int octaves, float bias, float blend) {
 	for (int i = 0; i < 256; i++) this->heightIndicatorList[i] = false;
 	this->blendResolKeyboard = 5.0f;
 	this->generateTerrain();
+
 }
 
 Terrain::~Terrain() {
@@ -172,6 +180,10 @@ void Terrain::makeSprite(sf::Sprite sprite) {
 	sprite.setTexture(tex);
 }
 
+bool Terrain::isInScreen(Point* a) {
+	return !(a->x < 0 || a->x >= this->getSizeX() || a->y < 0 || a->y >= this->getSizeY());
+}
+
 
 void Terrain::generateFromFile(const char* fileName) {
 	int* terrainDim = new int[2];
@@ -186,33 +198,60 @@ void Terrain::generateFromFile(const char* fileName) {
 } 
 
 
+void logPoint(Point* p) {
+	printf("Point : x = %f, y = %f, z = %f\n", p->x, p->y, p->z);
+}
+
+
 f32 Terrain::surfaceFunction(Point* p) {
 
+	if (!this->isInScreen(p)) return 0.0f;
+
 	if (this->heightMap == nullptr) this->generateTerrain();
+
+	//logPoint(p);
 
 	i32 round_x = (i32)floor(p->x);
 	i32 round_y = (i32)floor(p->y);
 
-	i32 a = round_y * this->sizeX + round_x;
-	i32 b = a + 1;
-	i32 c = a + this->sizeX;
-	i32 d = c + 1;
+	f32 float_x = p->x - round_x;
+	f32 float_y = p->y - round_y;
 
-	
-	f32 xSlope1 = (this->heightMap[b] - this->heightMap[a]);
-	f32 xSlope2 = (this->heightMap[d] - this->heightMap[c]);
-	
-	f32 ySlope = ((xSlope2 * (p->x - round_x) + this->heightMap[c]) 
-		- (xSlope1 * (p->x - round_x) + this->heightMap[a]));
+	i32 coord = round_y * this->sizeX + round_x;
 
-	return (ySlope * (p->y - round_y) + (xSlope1 * (p->x - round_x) + this->heightMap[a]));
+	if (float_x <= 0 && float_y <= 0) return this->heightMap[coord];
+
+	f32 corner_A = this->heightMap[coord];
+	f32 corner_B = this->heightMap[coord + this->sizeX];
+	f32 corner_C = this->heightMap[coord + 1];
+	f32 corner_D =this->heightMap[coord + this->sizeX + 1];
+
+	if (float_x >= float_y) {
+
+		f32 x_edgeZ = (1 - float_x) * corner_A + float_x * corner_C;
+		f32 mid_edgeZ = (1 - float_x) * corner_A + float_x * corner_D;
+		f32 y_percent = float_y / float_x;
+
+		return (1 - y_percent) * x_edgeZ + y_percent * mid_edgeZ;
+	}
+
+	else {
+
+		f32 y_edgeZ = (1 - float_y) * corner_A + float_y * corner_B;
+		f32 mid_edgeZ = (1 - float_y) * corner_A + float_y * corner_D;
+		f32 x_percent = float_x / float_y;
+
+		return (1 - x_percent) * y_edgeZ + x_percent * mid_edgeZ;
+
+	}
 }
 
 
 void Terrain::fillPoint(Point* p) {
-	p->z = surfaceFunction(p);
+	f32 height = surfaceFunction(p);;
+	if (height < CUTTING_HEIGHT) p->z = height - DOWN_OFFSET;
+	else p->z = height;
 }
-
 
 void Terrain::generateOBJFile(const char* folderName, float heightScale) {
 	try {
@@ -259,7 +298,7 @@ void Terrain::generateOBJFile(const char* folderName, float heightScale) {
 				for (int x = 0; x < sizeX; x++) {
 					
 					if(this->heightMap[y * this->sizeX + x] < CUTTING_HEIGHT)
-						buffer << "v " << std::to_string(y) << " " << std::to_string((heightScale * this->heightMap[y * this->sizeX + x]) - DOWN_OFFSET) << " " << std::to_string(x) << "\n";
+						buffer << "v " << std::to_string(y) << " " << std::to_string((heightScale * this->heightMap[y * this->sizeX + x]) - 500) << " " << std::to_string(x) << "\n";
 					else
 						buffer << "v " << std::to_string(y) << " " << std::to_string(heightScale * this->heightMap[y * this->sizeX + x]) << " " << std::to_string(x) << "\n";
 				}
@@ -327,7 +366,66 @@ Point* Terrain::getPointB() {
 	return this->pointB;
 }
 
+void Terrain::drawLine(Point* a, Point* b) {
+
+	Point difference = *b - *a;
+	f32 minCoord, maxCoord;
+
+
+	if (difference.x == 0) {
+		if (difference.y >= 0) {
+			minCoord = a->y;
+			maxCoord = b->y;
+		}
+
+		else {
+			minCoord = b->y;
+			maxCoord = a->y;
+		}
+
+		for (int y = (int)floor(minCoord); y <= maxCoord; y++) {
+			i32 coord = (y * this->sizeX + (i32)floor(b->x)) * 4;
+			this->colorMap[coord] = PATH_COLOR.r;
+			this->colorMap[coord + 1] = PATH_COLOR.g;
+			this->colorMap[coord + 2] = PATH_COLOR.b;
+			this->colorMap[coord + 3] = 255;
+		}
+	}
+
+	else {
+		f32 dy = difference.y / difference.x;
+
+		if (difference.x >= 0) {
+			minCoord = a->x;
+			maxCoord = b->x;
+		}
+
+		else {
+			minCoord = b->x;
+			maxCoord = a->x;
+		}
+
+		f32 minY = ((a->x <= b->x) ? a->y : b->y);
+
+		for (int x = (i32)floor(minCoord) + 1; x <= maxCoord; x++) {
+			i32 coord = (((i32)floor(minY + dy * (x - minCoord))) * this->sizeX + x) * 4;
+			this->colorMap[coord] = PATH_COLOR.r;
+			this->colorMap[coord + 1] = PATH_COLOR.g;
+			this->colorMap[coord + 2] = PATH_COLOR.b;
+			this->colorMap[coord + 3] = 255;
+		}
+	}
+	
+ }
+
+void Terrain::drawPath(void* p) {
+	Path* np = (Path*)p;
+	for (int i = 0; i < np->precision - 1; i++) this->drawLine(&np->points[i], &np->points[i + 1]);
+}
+
 void Terrain::generatePath() {
+	fillPoint(this->pointA);
+	fillPoint(this->pointB);
 	Path* path = initializePath(PATH_PRECISION, *this->pointA, *this->pointB, this);
 	if (!path) return;
 	this->generateColorMap(); // RESET IN CASE OF PATH
@@ -340,4 +438,114 @@ void Terrain::generatePath() {
 		this->colorMap[coord + 2] = PATH_COLOR.b;
 		this->colorMap[coord + 3] = 255;	//ALPHA
 	}
+}
+
+void Terrain::naivePath() {
+
+	fillPoint(this->pointA);
+	fillPoint(this->pointB);
+
+	pointList pathList = makePointList();
+	pathList->p = *this->pointB;
+	pathList = pointListAddHead(pathList, *this->pointA);
+	
+	f64 pathLength = naive_optimisation(pathList, this);
+	Path* path = emptyPath(this);
+	path->precision = getPointListSize(pathList);
+	path->points = pointListToArray(pathList);
+	path->startingPoint = path->points[0];
+	path->startingPoint = path->points[path->precision - 1];
+
+	//printf("Precision : %d", path->precision);
+
+	this->generateColorMap(); // RESET IN CASE OF PATH
+
+	for (int point = 1; point < path->precision - 1; point++) {
+		//printPoint(&path->points[point]);
+		i32 coord = ((int)floor(path->points[point].y) * this->sizeX + (int)floor(path->points[point].x)) * 4;
+		//printf("Point : %d, Coord : %d, Point.x = %f, Point.y = %f\n", point, coord, path->points[point].x, path->points[point].y);
+		this->colorMap[coord] = PATH_COLOR.r;
+		this->colorMap[coord + 1] = PATH_COLOR.g;
+		this->colorMap[coord + 2] = PATH_COLOR.b;
+		this->colorMap[coord + 3] = 255;	//ALPHA
+	}
+
+	/*for (int point = 0; point < path->precision - 1; point++) {
+		printPoint(&path->points[point]);
+		this->drawLine(&path->points[point], &path->points[point + 1]);
+	}*/
+
+	printf("Generated the Naïve solution! Total length : %f\n", pathLength);
+}
+
+
+void Terrain::drawBezier(bezier3 b) {
+	fillPoint(this->pointA);
+	fillPoint(this->pointB);
+
+	Path* path = initializePath(PATH_PRECISION, *this->pointA, *this->pointB, this);
+
+	for (int i = 1; i < PATH_PRECISION - 1; i++) {
+		path->points[i] = b.evaluate((f32)((f32)i / (f32)PATH_PRECISION));
+		this->fillPoint(&path->points[i]);
+	}
+
+	for (int point = 0; point < path->precision - 1; point++) {
+		//printPoint(&path->points[point]);
+		this->drawLine(&path->points[point], &path->points[point + 1]);
+	}
+}
+
+void Terrain::bezierPath() {
+
+	fillPoint(this->pointA);
+	fillPoint(this->pointB);
+
+	Path* path = initializePath(PATH_PRECISION, *this->pointA, *this->pointB, this);
+
+	f64 pathLength = bezier_approximation(path, *this->pointA, *this->pointB, this);
+
+	this->generateColorMap(); // RESET IN CASE OF PATH
+
+	/*for (int point = 1; point < path->precision - 1; point++) {
+		//printPoint(&path->points[point]);
+		i32 coord = ((int)floor(path->points[point].y) * this->sizeX + (int)floor(path->points[point].x)) * 4;
+		//printf("Point : %d, Coord : %d, Point.x = %f, Point.y = %f\n", point, coord, path->points[point].x, path->points[point].y);
+		this->colorMap[coord] = PATH_COLOR.r;
+		this->colorMap[coord + 1] = PATH_COLOR.g;
+		this->colorMap[coord + 2] = PATH_COLOR.b;
+		this->colorMap[coord + 3] = 255;	//ALPHA
+	}*/
+
+	for (int point = 0; point < path->precision - 1; point++) {
+		//printPoint(&path->points[point]);
+		this->drawLine(&path->points[point], &path->points[point + 1]);
+	}
+
+	printf("Generated a Bezier Approximation! Total length : %f\n", pathLength);
+}
+
+void Terrain::best_path() {
+	fillPoint(this->pointA);
+	fillPoint(this->pointB);
+
+	this->generateColorMap(); // RESET IN CASE OF PATH
+
+	Path* path = try_solution(this, *this->pointA, *this->pointB);
+
+	if (path == nullptr) {
+		printf("No solution were found :( \n");
+		return;
+	}
+
+	f64 length = computePathLength(path);
+
+	for (int point = 0; point < path->precision - 1; point++) {
+		//printPoint(&path->points[point]);
+		this->drawLine(&path->points[point], &path->points[point + 1]);
+	}
+
+	printf("Generated a solution! Total length : %f\n", length);
+
+	
 }

@@ -1,18 +1,6 @@
 #include "window/window.hpp"
 
-void press_drawStraightLine(sf::Event event, void* obj) {
-    Button* button = (Button*)obj;
-    int width = button->getWidth();
-    int height = button->getHeight();
-    sf::Vector2i mousePos = sf::Mouse::getPosition(*button->linkedWindow->win);
-    if (mousePos.x >= button->posX && mousePos.x <= button->posX + width) {
-        if (mousePos.y >= button->posY && mousePos.y <= button->posY + height) {
-            button->toggleIsPressed();
-        }
-    }
-}
-
-void press_saveOBJ(sf::Event event, void* obj) {
+void press_togglePressed(sf::Event event, void* obj) {
     Button* button = (Button*)obj;
     int width = button->getWidth();
     int height = button->getHeight();
@@ -77,12 +65,20 @@ void baseWindow(int width, int height, Terrain* terrain) {
 
     sf::Font mainFont;
     sf::Text title;
+    sf::Text sliderText;
     sf::Vector2f titlePos(16.0f, 16.0f);
+    sf::Vector2f sliderTextPos(285.0f, 625.0f);
     title.setPosition(titlePos);
     title.setString("TIPE");
     title.setFillColor(sf::Color::White);
     title.setCharacterSize(24);
     title.setStyle(sf::Text::Bold);
+
+    sliderText.setPosition(sliderTextPos);
+    sliderText.setString("Lignes de Niveau");
+    sliderText.setFillColor(sf::Color::White);
+    sliderText.setCharacterSize(24);
+    sliderText.setStyle(sf::Text::Bold);
 
     if (!mainFont.loadFromFile(DEFAULT_FONT)) {
         printf("Error, unrecognized font!");
@@ -90,6 +86,7 @@ void baseWindow(int width, int height, Terrain* terrain) {
     }
 
     title.setFont(mainFont);
+    sliderText.setFont(mainFont);
 
 
     sf::ContextSettings mainWinSettings;
@@ -97,11 +94,20 @@ void baseWindow(int width, int height, Terrain* terrain) {
     windowHierarchy mainWin(width, height, "TIPE", sf::Vector2i(80,80));
     
     Button drawPathButton(550, 175, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Straight Path", &mainWin);
+    Button naivePathButton(550, 300, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Bezier Sol.", &mainWin);
+    Button evolvedPathButton(550, 425, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Educated Sol.", &mainWin);
     Button saveOBJ(550, 50, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Save to OBJ", &mainWin);
-    Slider slider(400, 400, 200, 25, 1.0f, 21.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
+    Slider slider(300, 700, 200, 25, 1.0f, 21.0f, GRAY_COLOR, sf::Color::Blue, &mainWin);
 
-    drawPathButton.setReaction(press_drawStraightLine);
-    saveOBJ.setReaction(press_saveOBJ);
+
+    // press_togglePressed is a function that allows buttons to "send messages" by
+    // triggering a boolean that is captured in the main loop.
+    // One could do other methods for the buttons
+
+    drawPathButton.setReaction(press_togglePressed);
+    naivePathButton.setReaction(press_togglePressed);
+    evolvedPathButton.setReaction(press_togglePressed);
+    saveOBJ.setReaction(press_togglePressed);
     slider.setReaction(slider_move);
 
     mainWin.win->setKeyRepeatEnabled(true);
@@ -116,6 +122,7 @@ void baseWindow(int width, int height, Terrain* terrain) {
 
         mainWin.win->clear(sf::Color::Black);
         mainWin.win->draw(title);
+        mainWin.win->draw(sliderText);
         mainWin.drawObjects();
         mainWin.win->display();
 
@@ -133,6 +140,16 @@ void baseWindow(int width, int height, Terrain* terrain) {
         if (drawPathButton.isBeingPressed()) {
             drawPathButton.toggleIsPressed();
             terrain->generatePath();
+        }
+
+        if (naivePathButton.isBeingPressed()) {
+            naivePathButton.toggleIsPressed();
+            terrain->bezierPath();
+        }
+
+        if (evolvedPathButton.isBeingPressed()) {
+            evolvedPathButton.toggleIsPressed();
+            terrain->best_path();
         }
 	}
 
