@@ -14,7 +14,11 @@ void resizePoint(Point* p, f64 lambda);
 
 Path* emptyPath(Terrain* terrain);
 Path* initializePath(i16 precision, Point start, Point end, Terrain* terrain);
+Path* bezierToPath(bezier3 b, Terrain* terrain, i32 precision);
+
 void projectOnSurface(Path* p);
+
+f64 euclideanLength(Point a, Point b);
 
 f64 computePathLength(Path* p);
 f64 computeSurfaceLength(Point* a, Point* b, i16 resolution, Terrain* linkedTerrain);

@@ -5,6 +5,7 @@
 #include "utilitaries/types.hpp"
 #include "utilitaries/bezier.hpp"
 #include <sstream>
+#include <cmath>
 
 
 #define DOWN_OFFSET 100000
@@ -16,7 +17,12 @@
 class Terrain {
 	public:
 		
+		int			sizeX;
+		int			sizeY;
+		float*		heightMap;
+
 		Terrain(int sizeX, int SizeY, int octaves, float bias, float blend);
+		Terrain(Terrain* t);
 		~Terrain();
 
 		void generateTerrain();
@@ -64,9 +70,6 @@ class Terrain {
 
 
 	private:
-		int			sizeX;
-		int			sizeY;
-		float*		heightMap;
 		int			octaves;
 		float		bias;
 		float		blend;

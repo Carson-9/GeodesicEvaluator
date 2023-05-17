@@ -81,7 +81,7 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     sf::Vector2f infoTextPos(4.0f, 4.0f);
     infoText.setPosition(infoTextPos);
 
-    //mainTerrain->generateFromFile("Output/tGreece.txt");
+    //mainTerrain->generateFromFile("Output/LaPaz.txt");
     //mainTerrain->generateColorMap();
 
     sprintf_s(infoString, "Octaves : %d\nBias : %g\nColor Blend : %d", mainTerrain->getOctaves(), mainTerrain->getBias(), (int)mainTerrain->getBlend());
@@ -95,12 +95,13 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
     WindowPoint pointA((f32)width / 2 - 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
     WindowPoint pointB((f32)width / 2 + 30.0f, (f32)height / 2, 15.0f, sf::Color::Red, &mainWin);
 
-
     mainTerrain->setPoints(pointA.getReference(), pointB.getReference());
 
     pointA.setReaction(pointMove);
     pointB.setReaction(pointMove);
 
+
+    
     while (mainWin.win->isOpen()) {
         sf::Event event;
         while (mainWin.win->pollEvent(event))
@@ -114,12 +115,28 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
                 switch (event.key.code) {
 
                 case sf::Keyboard::Space:
-                    mainTerrain->generateTerrain();
+
+                     mainTerrain->generateTerrain();
+
+
+                    // TEST
+                    /*for (int y = 0; y < mainTerrain->getSizeY(); y++) {
+                        for (int x = 0; x < mainTerrain->getSizeY(); x++) {
+                            f32 scaled_x = (x - 500) / 50.0f;
+                            f32 scaled_y = (y - 500) / 50.0f;
+                            mainTerrain->heightMap[y * mainTerrain->getSizeX() + x] =
+                                70.0f * (cos(scaled_x) + sin(scaled_y) + 2);
+                        }
+                    }
+
+                    mainTerrain->generateColorMap();*/
+
                     break;
 
                 case sf::Keyboard::R:
                     mainTerrain->generateColorMap();
                     drawTerrain(&mainWin, mainTerrain, infoText);
+
                     break;
 
                 case sf::Keyboard::Left:
@@ -180,7 +197,6 @@ void launchTerrainWindow(int width, int height, Terrain* mainTerrain) {
         drawTerrain(&mainWin, mainTerrain, infoText);
         mainWin.drawObjects();
         mainWin.win->display();
-
     }
 
 }

@@ -61,6 +61,22 @@ Terrain::Terrain(int sizeX, int sizeY, int octaves, float bias, float blend) {
 
 }
 
+Terrain::Terrain(Terrain* t) {
+	this->sizeX = t->getSizeX();
+	this->sizeY = t->getSizeY();
+	this->heightMap = new float[sizeX * sizeY];
+	this->colorMap = nullptr;
+	this->blend = t->getBlend();
+	this->octaves = t->getOctaves();
+	this->bias = t->getBias();
+	this->pointA = new Point(0, 0, 0);
+	this->pointB = new Point(0, 0, 0);
+	this->drawHeightIndicators = false;
+	this->heightIndicatorList = new bool[256];
+	for (int i = 0; i < 256; i++) this->heightIndicatorList[i] = false;
+	this->blendResolKeyboard = 5.0f;
+}
+
 Terrain::~Terrain() {
 	if(this->colorMap != nullptr) delete this->colorMap;
 	delete this->heightMap;
@@ -206,6 +222,7 @@ void logPoint(Point* p) {
 f32 Terrain::surfaceFunction(Point* p) {
 
 	if (!this->isInScreen(p)) return 0.0f;
+	if (isnan(p->x) || isnan(p->y)) return 0.0f;
 
 	if (this->heightMap == nullptr) this->generateTerrain();
 
@@ -222,9 +239,15 @@ f32 Terrain::surfaceFunction(Point* p) {
 	if (float_x <= 0 && float_y <= 0) return this->heightMap[coord];
 
 	f32 corner_A = this->heightMap[coord];
-	f32 corner_B = this->heightMap[coord + this->sizeX];
-	f32 corner_C = this->heightMap[coord + 1];
-	f32 corner_D =this->heightMap[coord + this->sizeX + 1];
+	f32 corner_B;
+	if (round_y != this->getSizeY() - 1) corner_B = this->heightMap[coord + this->sizeX];
+	else return this->heightMap[coord];
+	f32 corner_C;
+	if (round_x != this->getSizeX() - 1) corner_C = this->heightMap[coord + 1];
+	else return this->heightMap[coord];
+	f32 corner_D;
+	if (round_y != this->getSizeY() - 1 && round_x != this->getSizeX() - 1) corner_D = this->heightMap[coord + this->sizeX + 1];
+	else return this->heightMap[coord];
 
 	if (float_x >= float_y) {
 
@@ -533,12 +556,13 @@ void Terrain::best_path() {
 
 	Path* path = try_solution(this, *this->pointA, *this->pointB);
 
+	this->generateColorMap(); // RESET IN CASE OF PATH
+
 	if (path == nullptr) {
 		printf("No solution were found :( \n");
 		return;
 	}
 
-	this->generateColorMap(); // RESET IN CASE OF PATH
 	f64 length = computePathLength(path);
 
 	for (int point = 0; point < path->precision - 1; point++) {

@@ -37,6 +37,26 @@ Path* initializePath(i16 precision, Point start, Point end, Terrain* terrain) {
 	return path;
 }
 
+
+Path* bezierToPath(bezier3 b, Terrain* terrain, i32 precision) {
+
+	Path* p = new Path();
+	p->startingPoint = b.A;
+	p->endPoint = b.B;
+
+	p->precision = precision;
+	p->points = new Point[precision];
+	p->linkedTerrain = terrain;
+
+	for (int i = 0; i < precision; i++) {
+		p->points[i] = b.evaluate((f32)i / (f32)(precision - 1));
+		terrain->fillPoint(&p->points[i]);
+	}
+
+	return p;
+}
+
+
 void projectOnSurface(Path* p) {
 	for (int point = 0; point < p->precision - 1; point++) {
 		p->linkedTerrain->fillPoint(&p->points[point]);
