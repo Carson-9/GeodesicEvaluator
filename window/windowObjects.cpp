@@ -1,4 +1,4 @@
-#include "window/windowObjects.hpp"
+#include "../window/windowObjects.hpp"
 
 
 void buttonTestReaction(sf::Event event, windowSlaveObjects* obj) {

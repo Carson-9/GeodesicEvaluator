@@ -59,7 +59,10 @@ bool are_path_close(Path* a, Path* b, f32 delta_distance) {
 			if (x == 0 && y == 0) path_existence_table[y][x] = free_space_diagram[0][0];
 			else if (x == 0) path_existence_table[y][x] = (path_existence_table[y - 1][x] && free_space_diagram[y][x]);
 			else if (y == 0) path_existence_table[y][x] = (path_existence_table[y][x - 1] && free_space_diagram[y][x]);
-			else path_existence_table[y][x] = free_space_diagram[y][x] && (path_existence_table[y - 1][x] || path_existence_table[y][x - 1] || path_existence_table[y - 1][x - 1]);
+			else path_existence_table[y][x] = free_space_diagram[y][x] &&
+				(path_existence_table[y - 1][x] ||
+				path_existence_table[y][x - 1] ||
+				path_existence_table[y - 1][x - 1]);
 		}
 	}
 

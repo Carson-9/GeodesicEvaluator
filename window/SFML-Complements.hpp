@@ -2,6 +2,5 @@
 #include <SFML/Graphics.hpp>
 //#include <SFML/Window/Mouse.hpp>
 
-void centerText(sf::Text text, sf::Vector2f pos);
 
 const sf::Color GRAY_COLOR(51, 51, 51, 255);

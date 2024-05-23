@@ -1,4 +1,4 @@
-#include "window/terrainWindow.hpp"
+#include "../window/terrainWindow.hpp"
 
 
 void pointMove(sf::Event event, void* obj) {

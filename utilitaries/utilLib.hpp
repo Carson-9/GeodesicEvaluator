@@ -1,6 +1,6 @@
 #pragma once
 #include <math.h>
-#include "utilitaries/types.hpp"
+#include "types.hpp"
 
 
 #define MIN(a,b) (((a)<(b))?(a):(b))

@@ -1,15 +1,15 @@
 #pragma once
 #include <vector>
 #include <cmath>
-#include "terrain/terrain.hpp"
-#include "utilitaries/types.hpp"
-#include "Path/Path.hpp"
+#include "../terrain/terrain.hpp"
+#include "../utilitaries/types.hpp"
+#include "../Path/Path.hpp"
 
 #define SOLVER_DERIVATIVE_PRECISION 0.01f
 #define SOLVER_STEP 0.1f
 #define SOLVER_ITERATION_LIMIT 20000
 #define SOLVER_EPSILON_VALUE 35
-#define SOLVER_CIRCLE_RESOLUTION 0.05f // DELTA THETA
+#define SOLVER_CIRCLE_RESOLUTION 0.005f // DELTA THETA
 #define SOLVER_BREAK 1000.0f
 
 Point terrain_du(Terrain* terrain, Point p);

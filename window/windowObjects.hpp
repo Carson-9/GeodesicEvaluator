@@ -1,9 +1,8 @@
 #pragma once
 
-#include "utilitaries/stringManipulation.hpp"
-#include "SFML-Complements.hpp"
-#include "utilitaries/types.hpp"
-#include "terrain/terrain.hpp"
+#include "../utilitaries/stringManipulation.hpp"
+#include "../window/SFML-Complements.hpp"
+#include "../utilitaries/types.hpp"
 
 class windowSlaveObjects;
 class windowHierarchy;

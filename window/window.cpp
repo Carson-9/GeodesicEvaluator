@@ -1,4 +1,4 @@
-#include "window/window.hpp"
+#include "../window/window.hpp"
 
 void press_togglePressed(sf::Event event, void* obj) {
     Button* button = (Button*)obj;
@@ -91,8 +91,8 @@ void baseWindow(int width, int height, Terrain* terrain) {
 
     sf::ContextSettings mainWinSettings;
     mainWinSettings.antialiasingLevel = 8;
-    windowHierarchy mainWin(width, height, "TIPE", sf::Vector2i(80,80));
-    
+    windowHierarchy mainWin(width, height, "TIPE", sf::Vector2i(80, 80));
+
     Button drawPathButton(550, 175, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Straight Path", &mainWin);
     Button naivePathButton(550, 300, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Bezier Sol.", &mainWin);
     Button evolvedPathButton(550, 425, 250, 75, sf::Color::White, sf::Color::Blue, DEFAULT_FONT, "Educated Sol.", &mainWin);
@@ -112,7 +112,7 @@ void baseWindow(int width, int height, Terrain* terrain) {
 
     mainWin.win->setKeyRepeatEnabled(true);
 
-	while (mainWin.win->isOpen()) {
+    while (mainWin.win->isOpen()) {
         sf::Event event;
         while (mainWin.win->pollEvent(event)) {
 
@@ -151,7 +151,7 @@ void baseWindow(int width, int height, Terrain* terrain) {
             evolvedPathButton.toggleIsPressed();
             terrain->best_path();
         }
-	}
+    }
 
     mainWin.clearOnClose();
 

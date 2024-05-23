@@ -1,9 +1,9 @@
 #pragma once
 
-#include "window/windowObjects.hpp"
-#include "multithreading/threadpool.hpp"
-#include "terrain/terrain.hpp"
-#include "Solver/solver.hpp"
+#include "../window/windowObjects.hpp"
+#include "../multithreading/threadpool.hpp"
+#include "../terrain/terrain.hpp"
+#include "../Solver/solver.hpp"
 
 typedef struct {
 	int WIDTH;
@@ -15,4 +15,3 @@ const char DEFAULT_FONT[] = "Resources/ALBold.ttf";
 
 void baseWindow(int width, int height, Terrain* terrain);
 void multiThreadedBaseWindow(void* args);
-void generateFieldLines(Terrain* terrain, int FieldLineNumber);

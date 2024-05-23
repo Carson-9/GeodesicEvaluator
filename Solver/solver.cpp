@@ -1,4 +1,4 @@
-#include "Solver/solver.hpp"
+#include "../Solver/solver.hpp"
 
 
 Point terrain_du(Terrain* terrain, Point p) {
@@ -161,15 +161,6 @@ std::vector<vec<f64>> RK4(Terrain* terrain, Point A, Point B, f64 initial_u_spee
 		Point new_point = Point(new_value.coord[0], new_value.coord[1], 0);
 		terrain->fillPoint(&new_point);
 		if (new_point.z <= CUTTING_HEIGHT) return values;
-
-		/*if (speed_norm > 10000.0f) {
-			printf("%f\n", speed_norm);
-			printf("Début\n");
-			k1->log();
-			k2->log();
-			k3->log();
-			k4->log();
-		}*/
 
 		values.push_back(new_value);
 

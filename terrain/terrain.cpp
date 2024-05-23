@@ -1,6 +1,6 @@
-﻿#include "terrain/terrain.hpp"
-#include "Path/path.hpp"
-#include "Solver/solver.hpp"
+﻿#include "../terrain/terrain.hpp"
+#include "../Path/path.hpp"
+#include "../Solver/solver.hpp"
 
 
 sf::Color GetCorrespondingColor(float height, float sigmoidBlend) {

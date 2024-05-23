@@ -1,5 +1,5 @@
 #pragma once
-#include<thread>
+#include <thread>
 
 typedef struct {
 	std::thread** threadpool;

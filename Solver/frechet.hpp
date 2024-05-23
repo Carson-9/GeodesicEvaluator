@@ -1,8 +1,8 @@
 #pragma once
 
-#include "terrain/terrain.hpp"
-#include "utilitaries/types.hpp"
-#include "Path/Path.hpp"
+#include "../terrain/terrain.hpp"
+#include "../utilitaries/types.hpp"
+#include "../Path/Path.hpp"
 
 #define FRECHET_EPSILON 50
 

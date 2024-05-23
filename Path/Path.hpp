@@ -1,8 +1,8 @@
 #pragma once
 
-#include "utilitaries/types.hpp"
-#include "utilitaries/bezier.hpp"
-#include "terrain/terrain.hpp"
+#include "../utilitaries/types.hpp"
+#include "../utilitaries/bezier.hpp"
+#include "../terrain/terrain.hpp"
 
 
 #define BEZIER_CHUNKING 199

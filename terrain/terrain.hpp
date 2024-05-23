@@ -1,9 +1,9 @@
 #pragma once
-#include "utilitaries/pseudoPerlin.hpp"
-#include "utilitaries/utilLib.hpp"
-#include "utilitaries/stringManipulation.hpp"
-#include "utilitaries/types.hpp"
-#include "utilitaries/bezier.hpp"
+#include "../utilitaries/pseudoPerlin.hpp"
+#include "../utilitaries/utilLib.hpp"
+#include "../utilitaries/stringManipulation.hpp"
+#include "../utilitaries/types.hpp"
+#include "../utilitaries/bezier.hpp"
 #include <sstream>
 #include <cmath>
 
